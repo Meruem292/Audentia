@@ -9,6 +9,13 @@ export interface UserProfile {
   role: 'user' | 'admin';
 }
 
+export interface Reward {
+    id: string;
+    name: string;
+    points: number;
+    imageUrl: string;
+}
+
 declare module "firebase-admin/auth" {
   interface DecodedIdToken {
     role?: 'user' | 'admin';

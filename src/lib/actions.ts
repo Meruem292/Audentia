@@ -2,9 +2,9 @@
 
 import * as z from "zod";
 import admin from "@/lib/firebase/admin";
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { UserProfile } from "./types";
+import type { Reward, UserProfile } from "./types";
 import { auth } from "firebase-admin";
 
 const signupSchema = z.object({
@@ -100,6 +100,64 @@ export async function getAdminAnalyticsAction() {
 
         return { success: true, data: analyticsData };
     } catch (error) {
+        console.error("Error fetching admin analytics:", error);
         return { error: 'Failed to fetch admin analytics' };
     }
+}
+
+async function seedInitialRewards() {
+    const rewardsRef = admin.firestore().collection('rewards');
+    const rewardsSnapshot = await rewardsRef.limit(1).get();
+    if (rewardsSnapshot.empty) {
+        const batch = admin.firestore().batch();
+        const defaultRewards = [
+            { name: "Reusable Water Bottle", points: 1000, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Bamboo Toothbrush Set", points: 1500, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Eco-friendly Tote Bag", points: 2000, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Solar-powered Charger", points: 5000, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Recycled Paper Notebook", points: 800, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Plantable Seed Pencils", points: 1200, imageUrl: "https://picsum.photos/300/200" },
+        ];
+        defaultRewards.forEach((reward, index) => {
+            const docRef = rewardsRef.doc(`item_${index + 1}`);
+            batch.set(docRef, { ...reward, id: `item_${index + 1}` });
+        });
+        await batch.commit();
+    }
+}
+
+export async function getRewardsAction() {
+  try {
+    await seedInitialRewards();
+    const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('id').get();
+    const rewards = rewardsSnapshot.docs.map(doc => doc.data() as Reward);
+    return { success: true, data: rewards };
+  } catch (error) {
+    console.error("Error fetching rewards:", error);
+    return { error: 'Failed to fetch rewards' };
+  }
+}
+
+const rewardUpdateSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1, "Name cannot be empty"),
+    points: z.number().int().min(0, "Points must be a positive number"),
+    imageUrl: z.string().url(),
+});
+
+export async function updateRewardAction(reward: Reward) {
+  try {
+    const validatedReward = rewardUpdateSchema.safeParse(reward);
+    if (!validatedReward.success) {
+      return { error: "Invalid reward data." };
+    }
+
+    const { id, ...rewardData } = validatedReward.data;
+    await admin.firestore().collection('rewards').doc(id).update(rewardData);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating reward:", error);
+    return { error: 'Failed to update reward' };
+  }
 }
