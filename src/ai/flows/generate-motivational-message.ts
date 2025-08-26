@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A motivational message generator for the Audentia app.
+ * @fileOverview A motivational message generator for the EcoVend app.
  *
  * - generateMotivationalMessage - A function that generates an eco-friendly motivational message.
  * - GenerateMotivationalMessageInput - The input type for the generateMotivationalMessage function.
@@ -30,7 +30,7 @@ const prompt = ai.definePrompt({
   name: 'motivationalMessagePrompt',
   input: {schema: GenerateMotivationalMessageInputSchema},
   output: {schema: GenerateMotivationalMessageOutputSchema},
-  prompt: `You are an AI assistant designed to provide eco-friendly motivational messages to users of the Audentia app. The app rewards users for recycling.
+  prompt: `You are an AI assistant designed to provide eco-friendly motivational messages to users of the EcoVend app. The app rewards users for recycling.
 
   The user currently has {{points}} points.
 
@@ -39,13 +39,13 @@ const prompt = ai.definePrompt({
   The message must be in less than 20 words.
 
   The speakers are named:
-  - AudentiaBot: a kind human voice
+  - EcoVendBot: a kind human voice
   - EcoBot: a friendly robot voice
 
   Here's an example message:
-  AudentiaBot: \"Great job!\"
+  EcoVendBot: \"Great job!\"
   EcoBot: \"You've earned {{points}} points and helped the planet!\"
-  AudentiaBot: \"Keep up the amazing work!\"\n`,
+  EcoVendBot: \"Keep up the amazing work!\"\n`,
 });
 
 const generateMotivationalMessageFlow = ai.defineFlow(
@@ -66,7 +66,7 @@ const generateMotivationalMessageFlow = ai.defineFlow(
           multiSpeakerVoiceConfig: {
             speakerVoiceConfigs: [
               {
-                speaker: 'AudentiaBot',
+                speaker: 'EcoVendBot',
                 voiceConfig: {
                   prebuiltVoiceConfig: { voiceName: 'Algenib' },
                 },

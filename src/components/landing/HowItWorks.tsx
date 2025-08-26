@@ -5,7 +5,7 @@ export default function HowItWorks() {
     {
       step: 1,
       title: "Sign Up",
-      description: "Create your Audentia account to get your unique 6-digit ID.",
+      description: "Create your EcoVend account to get your unique 6-digit ID.",
     },
     {
       step: 2,
@@ -31,7 +31,7 @@ export default function HowItWorks() {
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Simple Steps to Start Earning</h2>
             <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Getting started with Audentia is as easy as 1-2-3-4.
+              Getting started with EcoVend is as easy as 1-2-3-4.
             </p>
           </div>
         </div>

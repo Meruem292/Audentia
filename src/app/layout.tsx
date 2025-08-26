@@ -6,8 +6,8 @@ import Footer from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Audentia',
-  description: 'Earn points for recycling with Audentia',
+  title: 'EcoVend',
+  description: 'Earn points for recycling with EcoVend',
 };
 
 export default function RootLayout({

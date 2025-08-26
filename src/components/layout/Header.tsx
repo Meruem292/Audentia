@@ -59,7 +59,7 @@ export default function Header() {
         <div className="mr-4 flex items-center">
           <Link href={logoHref} className="flex items-center gap-2">
             <Recycle className="h-6 w-6 text-primary" />
-            <span className="font-bold">Audentia</span>
+            <span className="font-bold">EcoVend</span>
           </Link>
         </div>
         <nav className="hidden items-center gap-4 text-sm md:flex">
@@ -86,7 +86,7 @@ export default function Header() {
               <div className="flex flex-col gap-4 p-4">
                 <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
                   <Recycle className="h-6 w-6 text-primary" />
-                  <span className="font-bold">Audentia</span>
+                  <span className="font-bold">EcoVend</span>
                 </Link>
                 <div className="flex flex-col gap-2">
                   {navLinks.map((link) => (

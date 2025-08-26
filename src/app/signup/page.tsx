@@ -8,7 +8,7 @@ export default function SignupPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold">Create an Account</h1>
           <p className="text-muted-foreground">
-            Join Audentia and start earning points today.
+            Join EcoVend and start earning points today.
           </p>
         </div>
         <SignupForm />

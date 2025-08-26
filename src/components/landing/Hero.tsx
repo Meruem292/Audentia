@@ -13,7 +13,7 @@ export default function Hero() {
                 Turn Your Trash into Treasure
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Audentia rewards you for recycling. Simply deposit your plastic bottles into our smart reverse vending machine and earn points.
+                EcoVend rewards you for recycling. Simply deposit your plastic bottles into our smart reverse vending machine and earn points.
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
