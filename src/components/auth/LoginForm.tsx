@@ -18,7 +18,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 import { Loader2 } from "lucide-react";
+import type { UserProfile } from "@/lib/types";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -43,8 +46,25 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
-      router.push("/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // Fetch user profile from Firestore to get the role
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userProfile = userDoc.data() as UserProfile;
+        if (userProfile.role === 'admin') {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
+      } else {
+        // Fallback for users who might not have a doc yet
+        router.push("/dashboard");
+      }
+
     } catch (error: any) {
       toast({
         variant: "destructive",

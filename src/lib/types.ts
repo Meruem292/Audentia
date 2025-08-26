@@ -6,4 +6,5 @@ export interface UserProfile {
   points: number;
   sixDigitId: string;
   createdAt: Timestamp;
+  role: 'user' | 'admin';
 }

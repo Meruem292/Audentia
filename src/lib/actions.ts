@@ -4,10 +4,12 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
+import { UserProfile } from "./types";
 
 const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
+  role: z.enum(["user", "admin"]),
 });
 
 async function isSixDigitIdUnique(id: string): Promise<boolean> {
@@ -32,7 +34,7 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
       return { error: "Invalid input." };
     }
 
-    const { email, password } = validatedValues.data;
+    const { email, password, role } = validatedValues.data;
 
     const userRecord = await admin.auth().createUser({
       email,
@@ -47,15 +49,15 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
       points: 0,
       sixDigitId,
       createdAt: Timestamp.now(),
+      role,
     });
 
-    return { success: true, uid: userRecord.uid };
+    return { success: true, uid: userRecord.uid, role };
 
   } catch (error: any) {
     return { error: error.message || "An unexpected error occurred." };
   }
 }
-
 
 export async function getMotivationalMessageAction(points: number) {
   try {
@@ -65,4 +67,17 @@ export async function getMotivationalMessageAction(points: number) {
     console.error("Error generating motivational message:", error);
     return { error: "Failed to generate a message. Please try again." };
   }
+}
+
+export async function getUserRole(uid: string): Promise<{ role?: 'user' | 'admin', error?: string }> {
+    try {
+        const userDoc = await admin.firestore().collection('users').doc(uid).get();
+        if (!userDoc.exists) {
+            return { error: 'User not found.' };
+        }
+        const userProfile = userDoc.data() as UserProfile;
+        return { role: userProfile.role };
+    } catch (error) {
+        return { error: 'Failed to get user role.' };
+    }
 }
