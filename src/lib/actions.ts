@@ -44,6 +44,15 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
     const role = isFirstUser ? 'admin' : 'user';
 
     const { email, password } = validatedValues.data;
+    
+    try {
+        await admin.auth().getUserByEmail(email);
+        return { error: "An account with this email already exists." };
+    } catch (error: any) {
+        if (error.code !== 'auth/user-not-found') {
+            throw error;
+        }
+    }
 
     const userRecord = await admin.auth().createUser({
       email,
@@ -70,6 +79,47 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
   }
 }
 
+export async function createAdminAccountAction() {
+  try {
+    const email = "admin@gmail.com";
+    const password = "audentiaadmin";
+    const role = 'admin';
+
+    try {
+      await admin.auth().getUserByEmail(email);
+      return { error: "Admin account with this email already exists." };
+    } catch (error: any) {
+      if (error.code !== 'auth/user-not-found') {
+        throw error;
+      }
+    }
+
+    const userRecord = await admin.auth().createUser({
+      email,
+      password,
+    });
+
+    await auth().setCustomUserClaims(userRecord.uid, { role });
+    
+    const sixDigitId = await generateUniqueSixDigitId();
+
+    await admin.firestore().collection("users").doc(userRecord.uid).set({
+      uid: userRecord.uid,
+      email,
+      points: 0,
+      sixDigitId,
+      createdAt: Timestamp.now(),
+      role,
+    });
+
+    return { success: true, message: `Admin account ${email} created successfully.` };
+
+  } catch (error: any) {
+    return { error: error.message || "An unexpected error occurred." };
+  }
+}
+
+
 export async function getMotivationalMessageAction(points: number) {
   try {
     const result = await generateMotivationalMessage({ points });
@@ -78,4 +128,19 @@ export async function getMotivationalMessageAction(points: number) {
     console.error("Error generating motivational message:", error);
     return { error: "Failed to generate a message. Please try again." };
   }
+}
+
+export async function getAdminAnalyticsAction() {
+    try {
+        const usersSnapshot = await admin.firestore().collection('users').get();
+        const totalUsers = usersSnapshot.size;
+        
+        const analyticsData = {
+            totalUsers,
+        };
+
+        return { success: true, data: analyticsData };
+    } catch (error) {
+        return { error: 'Failed to fetch admin analytics' };
+    }
 }
