@@ -1,5 +1,5 @@
-# Firebase Studio
+# Audentia
 
-This is a NextJS starter in Firebase Studio.
+Welcome to Audentia, a Next.js app that rewards users for recycling.
 
 To get started, take a look at src/app/page.tsx.
