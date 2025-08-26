@@ -9,7 +9,6 @@ import { UserProfile } from "./types";
 const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  role: z.enum(["user", "admin"]),
 });
 
 async function isSixDigitIdUnique(id: string): Promise<boolean> {
@@ -27,14 +26,23 @@ async function generateUniqueSixDigitId(): Promise<string> {
   return id!;
 }
 
+async function hasUsers(): Promise<boolean> {
+    const userList = await admin.auth().listUsers(1);
+    return userList.users.length > 0;
+}
+
+
 export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSchema>) {
   try {
     const validatedValues = signupSchema.safeParse(values);
     if (!validatedValues.success) {
       return { error: "Invalid input." };
     }
+    
+    const isFirstUser = !(await hasUsers());
+    const role = isFirstUser ? 'admin' : 'user';
 
-    const { email, password, role } = validatedValues.data;
+    const { email, password } = validatedValues.data;
 
     const userRecord = await admin.auth().createUser({
       email,
@@ -55,6 +63,14 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
     return { success: true, uid: userRecord.uid, role };
 
   } catch (error: any) {
+    // If user creation fails, delete the auth user if it was created
+    if (error.code === 'auth/email-already-exists' && (await hasUsers())) {
+        const user = await admin.auth().getUserByEmail(values.email);
+        const userDoc = await admin.firestore().collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+            await admin.auth().deleteUser(user.uid);
+        }
+    }
     return { error: error.message || "An unexpected error occurred." };
   }
 }
