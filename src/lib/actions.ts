@@ -79,47 +79,6 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
   }
 }
 
-export async function createAdminAccountAction() {
-  try {
-    const email = "admin@gmail.com";
-    const password = "audentiaadmin";
-    const role = 'admin';
-
-    try {
-      await admin.auth().getUserByEmail(email);
-      return { error: "Admin account with this email already exists." };
-    } catch (error: any) {
-      if (error.code !== 'auth/user-not-found') {
-        throw error;
-      }
-    }
-
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-    });
-
-    await auth().setCustomUserClaims(userRecord.uid, { role });
-    
-    const sixDigitId = await generateUniqueSixDigitId();
-
-    await admin.firestore().collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
-      email,
-      points: 0,
-      sixDigitId,
-      createdAt: Timestamp.now(),
-      role,
-    });
-
-    return { success: true, message: `Admin account ${email} created successfully.` };
-
-  } catch (error: any) {
-    return { error: error.message || "An unexpected error occurred." };
-  }
-}
-
-
 export async function getMotivationalMessageAction(points: number) {
   try {
     const result = await generateMotivationalMessage({ points });
