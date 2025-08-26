@@ -25,6 +25,8 @@ export default function Header() {
     { href: "/#how-it-works", label: "How It Works" },
   ];
 
+  const logoHref = user ? "/dashboard" : "/";
+
   const renderAuthButtons = () => {
     if (loading) {
       return <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />;
@@ -55,7 +57,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href={logoHref} className="flex items-center gap-2">
             <Recycle className="h-6 w-6 text-primary" />
             <span className="font-bold">Audentia</span>
           </Link>
@@ -82,7 +84,7 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4 p-4">
-                <Link href="/" className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
+                <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
                   <Recycle className="h-6 w-6 text-primary" />
                   <span className="font-bold">Audentia</span>
                 </Link>
