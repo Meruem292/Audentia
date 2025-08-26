@@ -4,7 +4,8 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import { UserProfile } from "./types";
+import type { UserProfile } from "./types";
+import { auth } from "firebase-admin";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -48,6 +49,8 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
       email,
       password,
     });
+
+    await auth().setCustomUserClaims(userRecord.uid, { role });
     
     const sixDigitId = await generateUniqueSixDigitId();
 
@@ -63,14 +66,6 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
     return { success: true, uid: userRecord.uid, role };
 
   } catch (error: any) {
-    // If user creation fails, delete the auth user if it was created
-    if (error.code === 'auth/email-already-exists' && (await hasUsers())) {
-        const user = await admin.auth().getUserByEmail(values.email);
-        const userDoc = await admin.firestore().collection('users').doc(user.uid).get();
-        if (!userDoc.exists) {
-            await admin.auth().deleteUser(user.uid);
-        }
-    }
     return { error: error.message || "An unexpected error occurred." };
   }
 }
@@ -83,17 +78,4 @@ export async function getMotivationalMessageAction(points: number) {
     console.error("Error generating motivational message:", error);
     return { error: "Failed to generate a message. Please try again." };
   }
-}
-
-export async function getUserRole(uid: string): Promise<{ role?: 'user' | 'admin', error?: string }> {
-    try {
-        const userDoc = await admin.firestore().collection('users').doc(uid).get();
-        if (!userDoc.exists) {
-            return { error: 'User not found.' };
-        }
-        const userProfile = userDoc.data() as UserProfile;
-        return { role: userProfile.role };
-    } catch (error) {
-        return { error: 'Failed to get user role.' };
-    }
 }

@@ -8,3 +8,9 @@ export interface UserProfile {
   createdAt: Timestamp;
   role: 'user' | 'admin';
 }
+
+declare module "firebase-admin/auth" {
+  interface DecodedIdToken {
+    role?: 'user' | 'admin';
+  }
+}
