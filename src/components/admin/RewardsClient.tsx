@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateRewardAction } from "@/lib/actions";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
 
 interface RewardsClientProps {
   initialRewards: Reward[];
@@ -65,17 +64,7 @@ export default function RewardsClient({ initialRewards }: RewardsClientProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {rewards.map((reward) => (
         <Card key={reward.id}>
-          <CardHeader>
-            <Image 
-                src={reward.imageUrl}
-                alt={reward.name}
-                width={300}
-                height={200}
-                data-ai-hint="reward item"
-                className="rounded-md object-cover aspect-video"
-            />
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-6">
             {editingReward?.id === reward.id ? (
               <>
                 <div className="space-y-2">
