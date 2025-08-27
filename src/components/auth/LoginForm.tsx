@@ -53,6 +53,8 @@ export function LoginForm() {
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
+      router.refresh();
+
       if (userDoc.exists()) {
         const userProfile = userDoc.data() as UserProfile;
         if (userProfile.role === 'admin') {
