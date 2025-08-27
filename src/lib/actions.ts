@@ -4,7 +4,7 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, UserProfile } from "./types";
+import type { Reward, UserProfile, MachineVisionData } from "./types";
 import { auth } from "firebase-admin";
 
 const signupSchema = z.object({
@@ -111,16 +111,17 @@ async function seedInitialRewards() {
     if (rewardsSnapshot.empty) {
         const batch = admin.firestore().batch();
         const defaultRewards = [
-            { name: "Reusable Water Bottle", points: 1000, imageUrl: "https://picsum.photos/300/200" },
-            { name: "Bamboo Toothbrush Set", points: 1500, imageUrl: "https://picsum.photos/300/200" },
-            { name: "Eco-friendly Tote Bag", points: 2000, imageUrl: "https://picsum.photos/300/200" },
-            { name: "Solar-powered Charger", points: 5000, imageUrl: "https://picsum.photos/300/200" },
-            { name: "Recycled Paper Notebook", points: 800, imageUrl: "https://picsum.photos/300/200" },
-            { name: "Plantable Seed Pencils", points: 1200, imageUrl: "https://picsum.photos/300/200" },
+            { name: "Reusable Water Bottle", points: 1000 },
+            { name: "Bamboo Toothbrush Set", points: 1500 },
+            { name: "Eco-friendly Tote Bag", points: 2000 },
+            { name: "Solar-powered Charger", points: 5000 },
+            { name: "Recycled Paper Notebook", points: 800 },
+            { name: "Plantable Seed Pencils", points: 1200 },
         ];
         defaultRewards.forEach((reward, index) => {
-            const docRef = rewardsRef.doc(`item_${index + 1}`);
-            batch.set(docRef, { ...reward, id: `item_${index + 1}` });
+            const id = `item_${index + 1}`
+            const docRef = rewardsRef.doc(id);
+            batch.set(docRef, { ...reward, id });
         });
         await batch.commit();
     }
@@ -142,10 +143,9 @@ const rewardUpdateSchema = z.object({
     id: z.string(),
     name: z.string().min(1, "Name cannot be empty"),
     points: z.number().int().min(0, "Points must be a positive number"),
-    imageUrl: z.string().url(),
 });
 
-export async function updateRewardAction(reward: Reward) {
+export async function updateRewardAction(reward: Omit<Reward, 'imageUrl'>) {
   try {
     const validatedReward = rewardUpdateSchema.safeParse(reward);
     if (!validatedReward.success) {
@@ -160,4 +160,17 @@ export async function updateRewardAction(reward: Reward) {
     console.error("Error updating reward:", error);
     return { error: 'Failed to update reward' };
   }
+}
+
+export async function getLatestMachineVisionAction() {
+    try {
+        const doc = await admin.firestore().collection('machine_vision').doc('latest').get();
+        if (!doc.exists) {
+            return { success: true, data: null };
+        }
+        return { success: true, data: doc.data() as MachineVisionData };
+    } catch (error) {
+        console.error("Error fetching latest machine vision data:", error);
+        return { error: 'Failed to fetch machine vision data' };
+    }
 }

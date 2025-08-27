@@ -13,8 +13,15 @@ export interface Reward {
     id: string;
     name: string;
     points: number;
-    imageUrl: string;
 }
+
+export interface MachineVisionData {
+  imageUrl: string;
+  description: string;
+  isRecyclable: boolean;
+  createdAt: Timestamp;
+}
+
 
 declare module "firebase-admin/auth" {
   interface DecodedIdToken {

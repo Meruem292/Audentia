@@ -16,12 +16,13 @@ interface RewardsClientProps {
 
 export default function RewardsClient({ initialRewards }: RewardsClientProps) {
   const [rewards, setRewards] = useState<Reward[]>(initialRewards);
-  const [editingReward, setEditingReward] = useState<Reward | null>(null);
+  const [editingReward, setEditingReward] = useState<Omit<Reward, 'imageUrl'> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleEdit = (reward: Reward) => {
-    setEditingReward({ ...reward });
+    const { imageUrl, ...editableReward } = reward;
+    setEditingReward({ ...editableReward });
   };
 
   const handleCancel = () => {
@@ -45,7 +46,7 @@ export default function RewardsClient({ initialRewards }: RewardsClientProps) {
         title: "Reward Updated",
         description: `Successfully updated ${editingReward.name}.`,
       });
-      setRewards(rewards.map((r) => (r.id === editingReward.id ? editingReward : r)));
+      setRewards(rewards.map((r) => (r.id === editingReward.id ? { ...r, ...editingReward } : r)));
       setEditingReward(null);
     }
     setIsLoading(false);
