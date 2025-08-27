@@ -13,21 +13,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    const formData = await request.formData();
-    const imageFile = formData.get('image') as File | null;
-
-    if (!imageFile) {
-      return NextResponse.json({ error: 'No image file found in form data' }, { status: 400 });
+    const contentType = request.headers.get('Content-Type');
+    if (contentType !== 'image/jpeg') {
+        return NextResponse.json({ error: `Unsupported content type: ${contentType}` }, { status: 400 });
     }
 
-    // 1. Convert image to buffer and then to data URI
-    const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
-    const mimeType = imageFile.type;
+    const imageBuffer = Buffer.from(await request.arrayBuffer());
+
+    if (!imageBuffer.length) {
+      return NextResponse.json({ error: 'No image data found in request body' }, { status: 400 });
+    }
+
+    // 1. Convert image to data URI for the AI flow
+    const mimeType = 'image/jpeg';
     const photoDataUri = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
 
     // 2. Upload image to Firebase Storage
     const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
-    const fileName = `machine-vision/${randomUUID()}-${imageFile.name}`;
+    const fileName = `machine-vision/${randomUUID()}.jpg`;
     const file = bucket.file(fileName);
     await file.save(imageBuffer, {
       metadata: {
