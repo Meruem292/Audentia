@@ -7,7 +7,6 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Image as ImageIcon } from "lucide-react";
 
 interface MachineVisionClientProps {
@@ -39,9 +38,9 @@ export default function MachineVisionClient({ initialData }: MachineVisionClient
         <CardContent>
           {loading ? (
             <Skeleton className="aspect-video w-full" />
-          ) : visionData?.imageUrl ? (
+          ) : visionData?.imageDataUri ? (
             <Image
-              src={visionData.imageUrl}
+              src={visionData.imageDataUri}
               alt="Latest from ESP32"
               width={600}
               height={400}

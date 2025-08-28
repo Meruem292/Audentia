@@ -16,7 +16,7 @@ export interface Reward {
 }
 
 export interface MachineVisionData {
-  imageUrl: string;
+  imageDataUri: string;
   description: string;
   isRecyclable: boolean;
   createdAt: Timestamp;
