@@ -1,30 +1,24 @@
 //==============================================================
-// ESP32-CAM Photo Upload (for EcoVend / Audentia)
+// ESP32-CAM Base64 Photo Sender (for EcoVend / Audentia)
 // Board: AI-THINKER ESP32-CAM
-//==============================================================
-// IMPORTANT: 
-//  - Connect GPIO 0 to GND when flashing.
-//  - After flashing, disconnect GPIO 0 from GND and press RESET.
 //==============================================================
 
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
+#include "Base64.h" // Install Base64 library via Library Manager
 
-// --- IMPORTANT: CONFIGURE YOUR SETTINGS HERE ---
-// WiFi credentials
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+// --- CONFIGURE YOUR SETTINGS HERE ---
+const char* ssid = "God bless ";
+const char* password = "angpangetmo";
 
-// Server details
-const char* server_host = "YOUR_DEPLOYED_APP_URL"; // e.g., audentia.vercel.app
+const char* server_host = "audentia.vercel.app";
 const char* server_path = "/api/esp32/image";
 const int server_port = 443;
 
-// API Key (from your .env file)
+// This key must match the REVENDO_API_KEY in your web app's .env file
 const char* api_key = "a4b8c1d6-e2f3-4a5b-8c7d-9e0f1a2b3c4d";
-// --- END OF CONFIGURATION ---
-
+// --- END CONFIGURATION ---
 
 // Camera pin config for AI-THINKER model
 #define PWDN_GPIO_NUM     32
@@ -44,14 +38,13 @@ const char* api_key = "a4b8c1d6-e2f3-4a5b-8c7d-9e0f1a2b3c4d";
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
-// Persistent secure client
 WiFiClientSecure client;
 
 //==============================================================
-// Connect to Server with retries
+// Connect to Server
 //==============================================================
 bool connectToServer(int retries = 3) {
-  client.stop(); // Close any previous connection
+  client.stop();
 
   for (int i = 0; i < retries; i++) {
     Serial.printf("🔌 Connecting to server %s (%d/%d)...\n", server_host, i + 1, retries);
@@ -59,90 +52,72 @@ bool connectToServer(int retries = 3) {
       Serial.println("✅ Connected to server!");
       return true;
     }
-    Serial.printf("⚠️ Connection failed. Retrying in 2 seconds...\n");
+    Serial.println("⚠️ Connection failed, retrying in 2s...");
     delay(2000);
   }
 
-  Serial.println("❌ Could not connect to server after multiple retries.");
+  Serial.println("❌ Could not connect to server.");
   return false;
 }
 
 //==============================================================
-// Take and upload a photo
+// Take photo, convert to Base64, send JSON
 //==============================================================
-void takeAndUploadPhoto() {
+void takeAndSendBase64Photo() {
   camera_fb_t * fb = esp_camera_fb_get();
   if (!fb) {
     Serial.println("❌ Camera capture failed");
     return;
   }
 
-  Serial.printf("📸 Picture taken! Size: %zu bytes, Resolution: %dx%d\n", fb->len, fb->width, fb->height);
+  Serial.printf("📸 Picture taken! Size: %zu bytes\n", fb->len);
+
+  // Convert JPEG to Base64
+  String image_base64 = base64::encode(fb->buf, fb->len);
+
+  // Free camera buffer
+  esp_camera_fb_return(fb);
 
   if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("❌ WiFi disconnected, skipping upload.");
-    esp_camera_fb_return(fb);
+    Serial.println("❌ WiFi disconnected, skipping send.");
     return;
   }
 
   if (!connectToServer()) {
-    esp_camera_fb_return(fb);
     return;
   }
 
-  Serial.println("📤 Sending request...");
+  // Build JSON
+  String json = "{\"image\":\"" + image_base64 + "\"}";
 
-  // Build and send request headers
+  // Send POST request
   client.printf("POST %s HTTP/1.1\r\n", server_path);
   client.printf("Host: %s\r\n", server_host);
   client.printf("x-api-key: %s\r\n", api_key);
   client.println("User-Agent: ESP32-CAM Client");
   client.println("Connection: close");
-  client.println("Content-Type: image/jpeg");
-  client.printf("Content-Length: %d\r\n", fb->len);
+  client.println("Content-Type: application/json");
+  client.printf("Content-Length: %d\r\n", json.length());
   client.println();
+  client.print(json);
 
-  // Send JPEG data
-  client.write(fb->buf, fb->len);
-  
-  // Free the buffer AFTER sending
-  esp_camera_fb_return(fb);
+  Serial.println("📤 JSON sent, waiting for server response...");
 
-  Serial.println("... Waiting for server response ...");
-
-  // Read server response
+  // Read response
   unsigned long timeout = millis();
-  String response_headers = "";
-  String response_body = "";
-  bool headers_received = false;
-
+  String response = "";
   while (client.connected() && millis() - timeout < 10000) {
-      while (client.available()) {
-          if (!headers_received) {
-              String line = client.readStringUntil('\n');
-              response_headers += line + "\n";
-              if (line == "\r") {
-                  headers_received = true;
-              }
-          } else {
-              response_body += (char)client.read();
-          }
-      }
+    while (client.available()) {
+      char c = client.read();
+      response += c;
+    }
   }
 
-  Serial.println("\n⬅️ Server Response Headers:");
-  Serial.print(response_headers);
-  Serial.println("\n⬅️ Server Response Body:");
-  Serial.print(response_body);
+  Serial.println("\n⬅️ Server Response:");
+  Serial.println(response);
 
-  if (response_headers.indexOf("HTTP/1.1 200") != -1) {
-    Serial.println("\n✅ Upload successful!");
-  } else {
-    Serial.println("\n❌ Upload failed! Check server logs and API key.");
-  }
-  
   client.stop();
-  Serial.println("\nℹ️ Connection closed.");
+  Serial.println("ℹ️ Connection closed.");
 }
 
 //==============================================================
@@ -151,7 +126,7 @@ void takeAndUploadPhoto() {
 void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-  Serial.println("\n--- ESP32-CAM EcoVend Client ---");
+  Serial.println("\n--- ESP32-CAM Base64 Sender ---");
 
   // Camera config
   camera_config_t config;
@@ -175,18 +150,16 @@ void setup() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_VGA; // 640x480
-  config.jpeg_quality = 12;          // 0-63 (lower = better quality)
-  config.fb_count = 1;               // Use 1 frame buffer if PSRAM is limited
+  config.frame_size = FRAMESIZE_VGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 1;
   config.fb_location = CAMERA_FB_IN_PSRAM;
 
-  // Init camera
-  esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK) {
-    Serial.printf("❌ Camera init failed with error 0x%x\n", err);
+  if (esp_camera_init(&config) != ESP_OK) {
+    Serial.println("❌ Camera init failed");
     return;
   }
-  Serial.println("✅ Camera initialized successfully.");
+  Serial.println("✅ Camera initialized.");
 
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
@@ -197,17 +170,16 @@ void setup() {
   }
   Serial.printf("\n✅ WiFi connected! IP: %s\n", WiFi.localIP().toString().c_str());
 
-  // Configure secure client
-  client.setInsecure(); // Skip certificate validation for simplicity
-  client.setTimeout(15000); // 15 seconds
+  client.setInsecure(); // Skip SSL cert verification
+  client.setTimeout(15000);
 }
 
 //==============================================================
 // Loop
 //==============================================================
 void loop() {
-  Serial.println("\nType 'send' and press Enter to take and upload a photo.");
-  
+  Serial.println("\nType 'send' and press Enter to take and send a photo.");
+
   while (!Serial.available()) {
     delay(100);
   }
@@ -216,7 +188,7 @@ void loop() {
   command.trim();
 
   if (command.equalsIgnoreCase("send")) {
-    takeAndUploadPhoto();
+    takeAndSendBase64Photo();
   } else if (!command.isEmpty()) {
     Serial.print("Unknown command: ");
     Serial.println(command);

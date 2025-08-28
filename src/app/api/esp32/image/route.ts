@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import admin from '@/lib/firebase/admin';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { describeImage } from '@/ai/flows/describe-image-flow';
 import { getStorage } from 'firebase-admin/storage';
 import { randomUUID } from 'crypto';
@@ -14,11 +14,18 @@ export async function POST(request: Request) {
 
   try {
     const contentType = request.headers.get('Content-Type');
-    if (contentType !== 'image/jpeg') {
+    if (contentType !== 'application/json') {
         return NextResponse.json({ error: `Unsupported content type: ${contentType}` }, { status: 400 });
     }
 
-    const imageBuffer = Buffer.from(await request.arrayBuffer());
+    const body = await request.json();
+    const base64Image = body.image;
+
+    if (!base64Image || typeof base64Image !== 'string') {
+        return NextResponse.json({ error: 'Invalid JSON payload. "image" field with base64 string is required.' }, { status: 400 });
+    }
+    
+    const imageBuffer = Buffer.from(base64Image, 'base64');
 
     if (!imageBuffer.length) {
       return NextResponse.json({ error: 'No image data found in request body' }, { status: 400 });
@@ -26,7 +33,7 @@ export async function POST(request: Request) {
 
     // 1. Convert image to data URI for the AI flow
     const mimeType = 'image/jpeg';
-    const photoDataUri = `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
+    const photoDataUri = `data:${mimeType};base64,${base64Image}`;
 
     // 2. Upload image to Firebase Storage
     const bucket = getStorage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
