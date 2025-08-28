@@ -3,53 +3,54 @@
 #include <WiFiClientSecure.h>
 
 // =============================================================
-// == USER CONFIGURATION =======================================
+// == EDIT THE VALUES BELOW ====================================
 // =============================================================
 
-// -- WiFi Credentials
+// Replace with your network credentials
 const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
-// -- Server Details
-// Replace with your deployed Vercel/Firebase URL
-const char* server_host = "YOUR_APP_HOSTNAME"; 
+// Replace with your deployed application's URL (without https://)
+const char* server_host = "your-app-name.vercel.app"; 
+
+// Replace with your API Key from .env.local
+const char* api_key = "YOUR_REVENDO_API_KEY";
+
+// =============================================================
+// =============================================================
+
+// Server details
 const char* server_path = "/api/esp32/image";
 const int server_port = 443;
 
-// -- API Key
-// Make sure this matches the REVENDO_API_KEY in your .env.local file
-const char* api_key = "YOUR_REVENDO_API_KEY";
-
-// -- Upload Interval (milliseconds)
+// Upload interval (milliseconds)
 const int uploadInterval = 5000;
-
-// =============================================================
 
 // Persistent secure client
 WiFiClientSecure client;
 
 //==============================================================
-//== CAMERA PIN CONFIGURATION (for AI-THINKER ESP32-CAM) =======
+//== CAMERA PIN CONFIGURATION for ESP32-S3-WROOM-1 =============
 //==============================================================
-#define PWDN_GPIO_NUM     32
+#define PWDN_GPIO_NUM     -1
 #define RESET_GPIO_NUM    -1
-#define XCLK_GPIO_NUM      0
+#define XCLK_GPIO_NUM     10
 #define SIOD_GPIO_NUM     26
 #define SIOC_GPIO_NUM     27
 #define Y9_GPIO_NUM       35
 #define Y8_GPIO_NUM       34
 #define Y7_GPIO_NUM       39
 #define Y6_GPIO_NUM       36
-#define Y5_GPIO_NUM       21
-#define Y4_GPIO_NUM       19
+#define Y5_GPIO_NUM       19
+#define Y4_GPIO_NUM       21
 #define Y3_GPIO_NUM       18
-#define Y2_GPIO_NUM        5
+#define Y2_GPIO_NUM       5
 #define VSYNC_GPIO_NUM    25
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
 //==============================================================
-// Function to connect to server (reusing the connection)
+// Function to connect to server (reuse connection)
 //==============================================================
 bool connectToServer() {
   if (client.connected()) return true; // Already connected
@@ -97,7 +98,7 @@ void takeAndUploadPhoto() {
   Serial.println("Request sent. Waiting for response...");
 
   unsigned long timeout = millis();
-  while (client.connected() && millis() - timeout < 5000) { // Increased timeout for server processing
+  while (client.connected() && millis() - timeout < 5000) {
     while (client.available()) {
       String line = client.readStringUntil('\n');
       Serial.println(line);
@@ -137,18 +138,19 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
 
-  // Smaller frame size for speed and smaller payload
-  config.frame_size = FRAMESIZE_QVGA; // 320x240
-  config.jpeg_quality = 12; // Lower quality for smaller size
-  config.fb_count = 1;
+  // Smaller frame size for speed
+  config.frame_size = FRAMESIZE_QVGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 2; // Increased buffer count
+  config.fb_location = CAMERA_FB_IN_PSRAM; // <-- THIS IS THE FIX
 
   // Init camera
   if (esp_camera_init(&config) != ESP_OK) {
-    Serial.println("Camera init failed. Halting.");
-    while(true);
+    Serial.println("Camera init failed");
+    return;
   }
 
-  // Connect to Wi-Fi
+  // Connect to Wi-Fi once
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -158,8 +160,7 @@ void setup() {
   Serial.printf("\nWiFi connected! IP: %s\n", WiFi.localIP().toString().c_str());
 
   // Prepare secure client
-  client.setInsecure(); // Insecure for development. For production, use certificates.
-  connectToServer();
+  client.setInsecure(); // Insecure for development, use certificate in production
 }
 
 //==============================================================
