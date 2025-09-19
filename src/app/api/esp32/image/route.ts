@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import admin from '@/lib/firebase/admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { describeImage } from '@/ai/flows/describe-image-flow';
+import { countBottles } from '@/ai/flows/count-bottles-flow';
 
 export async function POST(request: Request) {
   const apiKey = request.headers.get('x-api-key');
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
 
   try {
     const contentType = request.headers.get('Content-Type');
-    if (contentType !== 'application/json') {
+    if (!contentType?.includes('application/json')) {
         return NextResponse.json({ error: `Unsupported content type: ${contentType}` }, { status: 400 });
     }
 
@@ -22,32 +23,33 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid JSON payload. "image" field with base64 string is required.' }, { status: 400 });
     }
     
-    // 1. Convert image to data URI for the AI flow and for storage
-    const mimeType = 'image/jpeg';
-    const imageDataUri = `data:${mimeType};base64,${base64Image}`;
+    const imageDataUri = `data:image/jpeg;base64,${base64Image}`;
 
-    // 2. Call the AI flow to get a description
-    const aiResponse = await describeImage({ photoDataUri: imageDataUri });
+    // Call our AI flows in parallel for efficiency
+    const [descriptionResult, bottleCountResult] = await Promise.all([
+      describeImage({ photoDataUri: imageDataUri }),
+      countBottles({ photoDataUri: imageDataUri })
+    ]);
 
-    if (!aiResponse) {
+    if (!descriptionResult || !bottleCountResult) {
       throw new Error("AI analysis failed.");
     }
     
-    const { description, isRecyclable } = aiResponse;
-
-    // 3. Save the image data URI and description to Firestore
+    // Save the analysis to Firestore
     const visionData = {
       imageDataUri,
-      description,
-      isRecyclable,
+      description: descriptionResult.description,
+      isRecyclable: descriptionResult.isRecyclable,
+      bottleCount: bottleCountResult.bottleCount,
       createdAt: Timestamp.now(),
     };
     await admin.firestore().collection('machine_vision').doc('latest').set(visionData);
 
+    // Respond to the ESP32 with the bottle count and recyclability status
     return NextResponse.json({
       success: true,
-      message: 'Image processed successfully.',
-      analysis: visionData
+      isRecyclable: visionData.isRecyclable,
+      bottleCount: visionData.bottleCount,
     });
 
   } catch (error) {
