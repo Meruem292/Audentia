@@ -6,7 +6,7 @@ import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Recycle } from "lucide-react";
 import { useState } from "react";
 
@@ -83,6 +83,12 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Main navigation links and authentication options.
+                </SheetDescription>
+              </SheetHeader>
               <div className="flex flex-col gap-4 p-4">
                 <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
                   <Recycle className="h-6 w-6 text-primary" />
