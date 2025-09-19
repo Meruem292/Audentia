@@ -6,9 +6,25 @@ import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Recycle } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, Recycle, User } from "lucide-react";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Header() {
   const { user, loading } = useAuth();
@@ -33,12 +49,26 @@ export default function Header() {
     }
     if (user) {
       return (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link href="/dashboard">Dashboard</Link>
-          </Button>
-          <Button onClick={handleSignOut}>Logout</Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+              <span className="sr-only">Open user menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard">Dashboard</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings">Settings</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     }
     return (
@@ -52,6 +82,27 @@ export default function Header() {
       </div>
     );
   };
+  
+   const renderMobileAuth = () => {
+    if (loading) {
+      return <Skeleton className="h-10 w-full" />;
+    }
+    if (user) {
+      return (
+        <div className="flex flex-col gap-2">
+            <Link href="/dashboard" className="text-lg" onClick={() => setIsSheetOpen(false)}>Dashboard</Link>
+            <Link href="/dashboard/settings" className="text-lg" onClick={() => setIsSheetOpen(false)}>Settings</Link>
+            <Button onClick={() => { handleSignOut(); setIsSheetOpen(false); }}>Logout</Button>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col gap-2">
+         <Button variant="ghost" asChild onClick={() => setIsSheetOpen(false)}><Link href="/login">Login</Link></Button>
+         <Button asChild onClick={() => setIsSheetOpen(false)}><Link href="/signup">Sign Up</Link></Button>
+      </div>
+    );
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -62,17 +113,19 @@ export default function Header() {
             <span className="font-bold">EcoVend</span>
           </Link>
         </div>
-        <nav className="hidden items-center gap-4 text-sm md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {!user && (
+           <nav className="hidden items-center gap-4 text-sm md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
         <div className="flex flex-1 items-center justify-end gap-4">
           <div className="hidden md:flex">{renderAuthButtons()}</div>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -94,19 +147,21 @@ export default function Header() {
                   <Recycle className="h-6 w-6 text-primary" />
                   <span className="font-bold">EcoVend</span>
                 </Link>
-                <div className="flex flex-col gap-2">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg"
-                      onClick={() => setIsSheetOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-                <div className="mt-auto flex flex-col gap-2">{renderAuthButtons()}</div>
+                {!user && (
+                    <div className="flex flex-col gap-2">
+                    {navLinks.map((link) => (
+                        <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-lg"
+                        onClick={() => setIsSheetOpen(false)}
+                        >
+                        {link.label}
+                        </Link>
+                    ))}
+                    </div>
+                )}
+                <div className="mt-auto flex flex-col gap-2">{renderMobileAuth()}</div>
               </div>
             </SheetContent>
           </Sheet>
