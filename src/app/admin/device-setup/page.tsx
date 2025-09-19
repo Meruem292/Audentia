@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,7 +49,7 @@ export default function DeviceSetupPage() {
              <CardDescription>
                 This key authenticates your device with the API. Find it in your .env file.
             </CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent>
             <div className="space-y-2">
                 <Label htmlFor="apiKey">X-API-KEY Header</Label>
