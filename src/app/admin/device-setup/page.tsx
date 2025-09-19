@@ -60,9 +60,16 @@ export default function DeviceSetupPage() {
       </div>
        <div className="mt-8 bg-muted p-4 rounded-lg">
         <h3 className="font-semibold mb-2">Example ESP32 Arduino Code Snippet</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          You will need a library to handle Base64 encoding, like <code className="bg-background p-1 rounded">arduino-base64</code>.
+        </p>
         <pre className="text-xs bg-background p-3 rounded-md overflow-x-auto">
           <code>
-{`// --- CONFIGURE YOUR SETTINGS HERE ---
+{`#include <WiFi.h>
+#include <HTTPClient.h>
+#include "base64.h" // Assuming you have a Base64 encoding library
+
+// --- CONFIGURE YOUR SETTINGS HERE ---
 const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
@@ -73,11 +80,14 @@ const int server_port = ${serverPort}; // Use 443 for HTTPS, 80 for HTTP
 const char* api_key = "${apiKey}";
 // --- END CONFIGURATION ---
 
-// Function to send Base64 image to your Next.js API
-void sendPhotoToAPI(String base64Photo) {
+// This function replaces your 'uploadToSupabase' function
+void sendPhotoToAPI(uint8_t* buffer, size_t size) {
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     
+    // Base64 encode the image buffer
+    String base64Photo = base64::encode(buffer, size);
+
     // Construct JSON payload
     String jsonPayload = "{\\"image\\":\\"" + base64Photo + "\\"}"
 
@@ -87,17 +97,22 @@ void sendPhotoToAPI(String base64Photo) {
 
     int httpResponseCode = http.POST(jsonPayload);
 
-    if (httpResponseCode > 0) {
+    if (httpResponseCode == 200) {
       String response = http.getString();
-      Serial.println(httpResponseCode);
+      Serial.println("Response from server:");
       Serial.println(response);
 
       // You can now parse the JSON response to get the bottle count
-      // For example: if (response.indexOf("bottleCount") > 0) { ... }
+      // For example, using ArduinoJson library:
+      // JSONVar myObject = JSON.parse(response);
+      // int bottleCount = myObject["bottleCount"];
+      // Serial.printf("Detected %d bottles\\n", bottleCount);
       
     } else {
       Serial.print("Error on sending POST: ");
       Serial.println(httpResponseCode);
+      String response = http.getString();
+      Serial.println(response);
     }
 
     http.end();
