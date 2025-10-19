@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { cookies } from 'next/headers';
@@ -13,9 +14,22 @@ export async function POST(request: Request) {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
 
   try {
-    // Verify the ID token to get the user's claims, including the custom 'role'
+    // Verify the ID token to get the user's UID
     const decodedIdToken = await getAuth().verifyIdToken(idToken);
+    const uid = decodedIdToken.uid;
+
+    // Fetch the user document from Firestore to get the role
+    const userDoc = await admin.firestore().collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      return NextResponse.json({ error: 'User data not found in Firestore.' }, { status: 404 });
+    }
     
+    const userRole = userDoc.data()?.role || 'user';
+
+    // Set custom claim on the user's token - this is good practice for consistency
+    // across the Firebase ecosystem (e.g., for security rules).
+    await getAuth().setCustomUserClaims(uid, { role: userRole });
+
     // Create the session cookie
     const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
     
@@ -27,7 +41,7 @@ export async function POST(request: Request) {
     });
     
     // Return the user's role to the client for immediate redirection
-    return NextResponse.json({ success: true, role: decodedIdToken.role || 'user' });
+    return NextResponse.json({ success: true, role: userRole });
   } catch (error) {
     console.error('Error creating session cookie:', error);
     return NextResponse.json({ error: 'Failed to create session' }, { status: 401 });

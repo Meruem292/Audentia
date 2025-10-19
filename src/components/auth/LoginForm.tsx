@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -19,7 +20,6 @@ import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Loader2 } from "lucide-react";
-import type { UserProfile } from "@/lib/types";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -28,18 +28,13 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-async function createSession(idToken: string): Promise<{ success: boolean; role: 'admin' | 'user' }> {
+async function createSession(idToken: string): Promise<{ success: boolean; role?: 'admin' | 'user'; error?: string }> {
     const response = await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
     });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create session');
-    }
-    
     return await response.json();
 }
 
@@ -62,14 +57,14 @@ export function LoginForm() {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
       
-      const idToken = await user.getIdToken();
-      const { role } = await createSession(idToken);
+      const idToken = await user.getIdToken(true); // Force refresh to get latest claims
+      const sessionResult = await createSession(idToken);
 
-      // Redirect based on the role returned from the session creation
-      if (role === 'admin') {
-          router.push("/admin/dashboard");
-      } else {
+      if (sessionResult.success) {
+          // Redirect to a generic dashboard path and let the server handle role-based routing.
           router.push("/dashboard");
+      } else {
+        throw new Error(sessionResult.error || "Session creation failed.");
       }
 
     } catch (error: any) {
