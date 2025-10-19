@@ -7,31 +7,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
-import type { UserProfile } from "@/lib/types";
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    // If a user is already logged in, redirect them away from the login page.
+    // The LoginForm will handle role-based redirection upon a *new* login.
     if (!loading && user) {
-       const checkRoleAndRedirect = async () => {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const userProfile = userDoc.data() as UserProfile;
-          if (userProfile.role === 'admin') {
-            router.replace("/admin/dashboard");
-          } else {
-            router.replace("/dashboard");
-          }
-        } else {
-          router.replace("/dashboard");
-        }
-      };
-      checkRoleAndRedirect();
+      router.replace("/dashboard");
     }
   }, [user, loading, router]);
 
