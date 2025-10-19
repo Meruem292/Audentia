@@ -1,29 +1,33 @@
 
-"use client";
-
 import { SignupForm } from "@/components/auth/SignupForm";
 import Link from "next/link";
-import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+import { cookies } from "next/headers";
+import { getAuth } from "firebase-admin/auth";
+import { redirect } from "next/navigation";
+import admin from "@/lib/firebase/admin"; // ensure admin is initialized
 
-export default function SignupPage() {
-  const { loading } = useAuth();
+async function checkUserSession() {
+    const sessionCookie = cookies().get('session')?.value;
+    if (!sessionCookie) return null;
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[calc(100vh-112px)] items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-4">
-          <Skeleton className="h-10 w-3/4 mx-auto" />
-          <Skeleton className="h-6 w-1/2 mx-auto" />
-          <div className="space-y-4 pt-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
-      </div>
-    );
-  }
+    try {
+        const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
+        return decodedClaims;
+    } catch (error) {
+        return null;
+    }
+}
+
+export default async function SignupPage() {
+    const user = await checkUserSession();
+
+    if (user) {
+        if (user.role === 'admin') {
+            redirect('/admin/dashboard');
+        } else {
+            redirect('/dashboard');
+        }
+    }
 
   return (
     <div className="flex min-h-[calc(100vh-112px)] items-center justify-center p-4">

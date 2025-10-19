@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -51,7 +52,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-8">
        <div className="mb-4">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">An overview of your EcoVend system.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
