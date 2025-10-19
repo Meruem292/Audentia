@@ -15,14 +15,6 @@ export interface Reward {
     points: number;
 }
 
-export interface MachineVisionData {
-  imageDataUri: string;
-  description: string;
-  isRecyclable: boolean;
-  createdAt: Timestamp;
-}
-
-
 declare module "firebase-admin/auth" {
   interface DecodedIdToken {
     role?: 'user' | 'admin';

@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Gift, Eye } from "lucide-react";
+import { Home, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Home },
   { href: "/admin/rewards", label: "Rewards", icon: Gift },
-  { href: "/admin/machine-vision", label: "Machine Vision", icon: Eye },
 ];
 
 export default function AdminSidebar() {

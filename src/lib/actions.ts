@@ -4,7 +4,7 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, UserProfile, MachineVisionData } from "./types";
+import type { Reward, UserProfile } from "./types";
 import { auth } from "firebase-admin";
 
 const signupSchema = z.object({
@@ -160,17 +160,4 @@ export async function updateRewardAction(reward: Omit<Reward, 'imageUrl'>) {
     console.error("Error updating reward:", error);
     return { error: 'Failed to update reward' };
   }
-}
-
-export async function getLatestMachineVisionAction() {
-    try {
-        const doc = await admin.firestore().collection('machine_vision').doc('latest').get();
-        if (!doc.exists) {
-            return { success: true, data: null };
-        }
-        return { success: true, data: doc.data() as MachineVisionData };
-    } catch (error) {
-        console.error("Error fetching latest machine vision data:", error);
-        return { error: 'Failed to fetch machine vision data' };
-    }
 }

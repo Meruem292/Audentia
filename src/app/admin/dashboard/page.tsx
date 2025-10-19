@@ -1,4 +1,4 @@
-import { Users, Bot, KeyRound } from "lucide-react";
+import { Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -19,30 +19,6 @@ export default async function AdminDashboardPage() {
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <AdminDashboardClient initialData={analytics.data} />
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Machines Online</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">56</div>
-            <p className="text-xs text-muted-foreground">
-              2 actively recycling
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">API Key</CardTitle>
-            <KeyRound className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-mono bg-muted p-2 rounded">REVENDO-XXXX-XXXX-XXXX</div>
-            <p className="text-xs text-muted-foreground">
-              Use this key for partner machines.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
