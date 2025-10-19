@@ -16,7 +16,12 @@ export default async function DashboardRedirectPage() {
         } else {
             redirect('/dashboard/home');
         }
-    } catch (error) {
+    } catch (error: any) {
+        // If the error is a redirect, we don't want to log it as an error.
+        // NEXT_REDIRECT is a special string Next.js uses for this purpose.
+        if (error.digest?.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
         console.error("Session verification failed, redirecting to login:", error);
         redirect('/login');
     }
