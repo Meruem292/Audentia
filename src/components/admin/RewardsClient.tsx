@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { updateRewardAction, createRewardAction, deleteRewardAction } from "@/lib/actions";
+import { updateRewardAction, deleteRewardAction } from "@/lib/actions";
 import { Loader2, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -36,9 +36,7 @@ interface RewardsClientProps {
 export default function RewardsClient({ initialRewards }: RewardsClientProps) {
   const [rewards, setRewards] = useState<Reward[]>(initialRewards);
   const [editingReward, setEditingReward] = useState<Reward | null>(null);
-  const [newReward, setNewReward] = useState({ name: "", points: 0 });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -96,36 +94,6 @@ export default function RewardsClient({ initialRewards }: RewardsClientProps) {
     setIsDeleting(null);
   }
 
-  const handleCreate = async () => {
-    if (!newReward.name || newReward.points <= 0) {
-      toast({
-        variant: "destructive",
-        title: "Invalid Input",
-        description: "Please provide a valid name and point value.",
-      });
-      return;
-    }
-    setIsCreating(true);
-
-    const result = await createRewardAction(newReward);
-
-    if (result.error || !result.data) {
-      toast({
-        variant: "destructive",
-        title: "Create Failed",
-        description: result.error,
-      });
-    } else {
-      toast({
-        title: "Reward Created",
-        description: `Successfully created ${result.data.name}.`,
-      });
-      setRewards([...rewards, result.data]);
-      setNewReward({ name: "", points: 0 });
-    }
-    setIsCreating(false);
-  }
-
   const handleEditingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editingReward) return;
     const { name, value } = e.target;
@@ -135,39 +103,8 @@ export default function RewardsClient({ initialRewards }: RewardsClientProps) {
     });
   };
 
-  const handleNewChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewReward({
-      ...newReward,
-      [name]: name === "points" ? Number(value) : value,
-    });
-  };
-
   return (
     <div className="space-y-8">
-        <Card>
-            <CardHeader>
-                <CardTitle>Add New Reward</CardTitle>
-                <CardDescription>Create a new item that can be dispensed as a reward.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="new-name">Item Name</Label>
-                  <Input id="new-name" name="name" value={newReward.name} onChange={handleNewChange} placeholder="e.g., Reusable Bottle"/>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-points">Points</Label>
-                  <Input id="new-points" name="points" type="number" value={newReward.points} onChange={handleNewChange} />
-                </div>
-            </CardContent>
-            <CardFooter>
-                 <Button onClick={handleCreate} disabled={isCreating}>
-                  {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Reward
-                </Button>
-            </CardFooter>
-        </Card>
-
         <div>
             <h2 className="text-2xl font-bold mb-4">Existing Rewards</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

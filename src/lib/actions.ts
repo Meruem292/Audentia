@@ -67,7 +67,7 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
       role,
     });
 
-    return { success: true, uid: userRecord.uid, role };
+    return { success: true, uid: userRecord.uid };
 
   } catch (error: any)
    {
@@ -141,34 +141,6 @@ export async function updateRewardAction(reward: Reward) {
     console.error("Error updating reward:", error);
     return { error: 'Failed to update reward' };
   }
-}
-
-const rewardCreateSchema = z.object({
-    name: z.string().min(1, "Name cannot be empty"),
-    points: z.number().int().min(1, "Points must be greater than zero"),
-});
-
-export async function createRewardAction(reward: Omit<Reward, 'id'>) {
-    try {
-        const validatedReward = rewardCreateSchema.safeParse(reward);
-        if (!validatedReward.success) {
-            return { error: "Invalid reward data." };
-        }
-
-        const newRewardRef = admin.firestore().collection('rewards').doc();
-        const newReward = {
-            ...validatedReward.data,
-            id: newRewardRef.id,
-        };
-        
-        await newRewardRef.set(newReward);
-
-        revalidatePath("/admin/rewards");
-        return { success: true, data: newReward };
-    } catch (error) {
-        console.error("Error creating reward:", error);
-        return { error: 'Failed to create reward' };
-    }
 }
 
 export async function deleteRewardAction(rewardId: string) {
