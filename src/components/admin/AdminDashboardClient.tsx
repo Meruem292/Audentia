@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
@@ -11,30 +10,20 @@ interface AdminAnalytics {
 
 interface AdminDashboardClientProps {
     initialData: AdminAnalytics | null;
+    isLoading: boolean;
+    error: string | null;
 }
 
-export default function AdminDashboardClient({ initialData }: AdminDashboardClientProps) {
-  const [analytics, setAnalytics] = useState<AdminAnalytics | null>(initialData);
-  const [loading, setLoading] = useState(!initialData);
-  const [error, setError] = useState<string | null>(null);
+export default function AdminDashboardClient({ initialData, isLoading, error }: AdminDashboardClientProps) {
 
-  useEffect(() => {
-    // This can be used for real-time updates if needed in the future
-    // For now, we rely on the server-fetched initialData
-    if (initialData) {
-        setAnalytics(initialData);
-        setLoading(false);
-    }
-  }, [initialData]);
-
-  const StatCard = ({ title, value, icon: Icon, description, isLoading }: { title: string, value: string | number, icon: React.ElementType, description: string, isLoading: boolean }) => (
+  const StatCard = ({ title, value, icon: Icon, description, isLoading: cardIsLoading }: { title: string, value: string | number, icon: React.ElementType, description: string, isLoading: boolean }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {cardIsLoading ? (
             <>
                 <Skeleton className="h-8 w-1/3" />
                 <Skeleton className="h-4 w-2/3 mt-2" />
@@ -54,10 +43,10 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
   return (
     <StatCard 
         title="Total Users" 
-        value={analytics?.totalUsers ?? 0} 
+        value={initialData?.totalUsers ?? 0} 
         icon={Users} 
         description="All registered users in the system."
-        isLoading={loading}
+        isLoading={isLoading}
     />
   );
 }

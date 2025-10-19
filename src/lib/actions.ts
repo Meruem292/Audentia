@@ -89,22 +89,6 @@ export async function getMotivationalMessageAction(points: number) {
   }
 }
 
-export async function getAdminAnalyticsAction() {
-    try {
-        const usersSnapshot = await admin.firestore().collection('users').get();
-        const totalUsers = usersSnapshot.size;
-        
-        const analyticsData = {
-            totalUsers,
-        };
-
-        return { success: true, data: analyticsData };
-    } catch (error) {
-        console.error("Error fetching admin analytics:", error);
-        return { error: 'Failed to fetch admin analytics' };
-    }
-}
-
 async function seedInitialRewards() {
     const rewardsRef = admin.firestore().collection('rewards');
     const rewardsSnapshot = await rewardsRef.limit(1).get();
