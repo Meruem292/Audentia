@@ -28,7 +28,7 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-async function createSession(idToken: string) {
+async function createSession(idToken: string): Promise<{ success: boolean; role: 'admin' | 'user' }> {
     const response = await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -63,10 +63,14 @@ export function LoginForm() {
       const user = userCredential.user;
       
       const idToken = await user.getIdToken();
-      await createSession(idToken);
+      const { role } = await createSession(idToken);
 
-      // Redirect to the generic dashboard, server will handle role-based routing
-      router.push("/dashboard");
+      // Redirect based on the role returned from the session creation
+      if (role === 'admin') {
+          router.push("/admin/dashboard");
+      } else {
+          router.push("/dashboard");
+      }
 
     } catch (error: any) {
       toast({
