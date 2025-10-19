@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -20,20 +21,24 @@ export default function Home() {
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       if (user) {
-        // Fetch user profile to check role for correct redirection
         const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          const userProfile = userDoc.data() as UserProfile;
-          if (userProfile.role === 'admin') {
-            router.replace("/admin/dashboard");
+        try {
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const userProfile = userDoc.data() as UserProfile;
+            if (userProfile.role === 'admin') {
+              router.replace("/admin/dashboard");
+            } else {
+              router.replace("/dashboard");
+            }
           } else {
+            // Fallback for new users, profile might not be created yet
             router.replace("/dashboard");
           }
-        } else {
-          // Fallback if doc doesn't exist for some reason
-          router.replace("/dashboard");
+        } catch (error) {
+            console.error("Error fetching user document:", error);
+            // Fallback redirection
+            router.replace("/dashboard");
         }
       }
     };
