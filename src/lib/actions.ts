@@ -6,8 +6,6 @@ import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
 import type { Reward, UserProfile } from "./types";
 import { auth } from "firebase-admin";
-import { headers } from "next/headers";
-import { getAuth } from "firebase-admin/auth";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -92,9 +90,6 @@ export async function getMotivationalMessageAction(points: number) {
 }
 
 export async function getAdminAnalyticsAction() {
-    // This action is now secured at the API route level
-    // and layout level. No need for additional checks here, but
-    // keeping it separate for clarity.
     try {
         const usersSnapshot = await admin.firestore().collection('users').get();
         const totalUsers = usersSnapshot.size;

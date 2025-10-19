@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BrainCircuit, Play, Loader2, StopCircle } from "lucide-react";
+import { BrainCircuit, Play, StopCircle } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import type { GenerateMotivationalMessageOutput } from "@/ai/flows/generate-motivational-message";
 import { useState, useRef, useEffect } from "react";
@@ -69,7 +69,7 @@ export default function MotivationalMessage({ messageData, isLoading }: Motivati
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Eco-Friendly Tip</CardTitle>
+        <CardTitle>Eco-Friendly Tip</CardTitle>
         <BrainCircuit className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>

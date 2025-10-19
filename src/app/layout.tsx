@@ -4,6 +4,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
+import PushNotificationManager from '@/components/dashboard/PushNotificationManager';
 
 export const metadata: Metadata = {
   title: 'EcoVend',
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Footer />
           </div>
           <Toaster />
+          <PushNotificationManager />
         </AuthProvider>
       </body>
     </html>

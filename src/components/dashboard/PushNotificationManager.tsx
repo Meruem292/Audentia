@@ -15,9 +15,12 @@ export default function PushNotificationManager() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if ("Notification" in window && VAPID_KEY) {
+    if (typeof window !== 'undefined' && "Notification" in window && VAPID_KEY) {
       if (Notification.permission === "granted" && user) {
         setupNotifications();
+      } else if (Notification.permission !== "denied") {
+        // We could ask for permission here, but for now we'll rely on a manual trigger
+        // For example, a button in the settings page
       }
     }
   }, [user]);
