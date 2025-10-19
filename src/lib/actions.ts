@@ -1,3 +1,4 @@
+
 "use server";
 
 import * as z from "zod";
@@ -27,12 +28,6 @@ async function generateUniqueSixDigitId(): Promise<string> {
   return id!;
 }
 
-async function hasUsers(): Promise<boolean> {
-    const userList = await admin.auth().listUsers(1);
-    return userList.users.length > 0;
-}
-
-
 export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSchema>) {
   try {
     const validatedValues = signupSchema.safeParse(values);
@@ -40,8 +35,7 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
       return { error: "Invalid input." };
     }
     
-    const isFirstUser = !(await hasUsers());
-    const role = isFirstUser ? 'admin' : 'user';
+    const role = 'user';
 
     const { email, password } = validatedValues.data;
     
@@ -74,7 +68,9 @@ export async function signUpWithEmailAndPassword(values: z.infer<typeof signupSc
 
     return { success: true, uid: userRecord.uid, role };
 
-  } catch (error: any) {
+  } catch (error: any)
+   {
+    console.error("Signup Error:", error);
     return { error: error.message || "An unexpected error occurred." };
   }
 }
