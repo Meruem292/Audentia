@@ -30,6 +30,14 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
+async function createSession(idToken: string) {
+    await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken }),
+    });
+}
+
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
@@ -48,12 +56,13 @@ export function LoginForm() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
+      
+      const idToken = await user.getIdToken();
+      await createSession(idToken);
 
       // Fetch user profile from Firestore to get the role
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
-
-      router.refresh();
 
       if (userDoc.exists()) {
         const userProfile = userDoc.data() as UserProfile;

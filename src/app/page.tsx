@@ -17,6 +17,7 @@ export default function Home() {
 
   useEffect(() => {
     // If the user is logged in, redirect them to their dashboard.
+    // The server will handle role-based redirection from there.
     if (!loading && user) {
       router.replace("/dashboard");
     }

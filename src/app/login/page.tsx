@@ -14,7 +14,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     // If a user is already logged in, redirect them away from the login page.
-    // The LoginForm will handle role-based redirection upon a *new* login.
     if (!loading && user) {
       router.replace("/dashboard");
     }
