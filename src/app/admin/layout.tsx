@@ -1,5 +1,6 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { verifyAdmin } from "@/lib/auth";
+import { redirect } from 'next/navigation';
 
 export default async function AdminLayout({
   children,
@@ -7,7 +8,18 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
 
-  await verifyAdmin();
+  try {
+    await verifyAdmin();
+  } catch (error: any) {
+    if (error.digest?.includes('NEXT_REDIRECT')) {
+      // This is an expected redirect, so we re-throw it to let Next.js handle it.
+      throw error;
+    }
+    // For other errors, you might want to log them or redirect to a generic error page.
+    console.error("Error in admin layout:", error);
+    redirect('/login');
+  }
+
 
   return (
     <div className="flex min-h-screen">
