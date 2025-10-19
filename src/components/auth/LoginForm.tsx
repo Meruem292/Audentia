@@ -18,8 +18,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { auth } from "@/lib/firebase/config";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { Loader2 } from "lucide-react";
 import type { UserProfile } from "@/lib/types";
 
@@ -30,12 +28,18 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-async function createSession(idToken: string) {
-    await fetch('/api/auth/session', {
+async function createSession(idToken: string): Promise<{role: 'admin' | 'user'}> {
+    const response = await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
     });
+
+    if (!response.ok) {
+        throw new Error('Failed to create session');
+    }
+    
+    return await response.json();
 }
 
 export function LoginForm() {
@@ -58,21 +62,11 @@ export function LoginForm() {
       const user = userCredential.user;
       
       const idToken = await user.getIdToken();
-      await createSession(idToken);
+      const { role } = await createSession(idToken);
 
-      // Fetch user profile from Firestore to get the role
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const userProfile = userDoc.data() as UserProfile;
-        if (userProfile.role === 'admin') {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/dashboard");
-        }
+      if (role === 'admin') {
+        router.push("/admin/dashboard");
       } else {
-        // Fallback for users who might not have a doc yet
         router.push("/dashboard");
       }
 

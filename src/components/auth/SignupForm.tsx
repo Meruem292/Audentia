@@ -49,18 +49,14 @@ export function SignupForm() {
         title: "Signup Failed",
         description: result.error,
       });
+      setIsLoading(false);
     } else {
       toast({
         title: "Signup Successful",
-        description: "Welcome! You are now being redirected.",
+        description: "Welcome! Please log in to continue.",
       });
-      if (result.role === 'admin') {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/login");
     }
-    setIsLoading(false);
   }
 
   return (

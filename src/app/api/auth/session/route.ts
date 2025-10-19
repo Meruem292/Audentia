@@ -13,6 +13,10 @@ export async function POST(request: Request) {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
 
   try {
+    // Verify the ID token to get the user's claims, including the custom 'role'
+    const decodedIdToken = await getAuth().verifyIdToken(idToken);
+    
+    // Create the session cookie
     const sessionCookie = await getAuth().createSessionCookie(idToken, { expiresIn });
     
     cookies().set('session', sessionCookie, {
@@ -22,7 +26,8 @@ export async function POST(request: Request) {
       path: '/',
     });
     
-    return NextResponse.json({ success: true });
+    // Return the user's role to the client for immediate redirection
+    return NextResponse.json({ success: true, role: decodedIdToken.role || 'user' });
   } catch (error) {
     console.error('Error creating session cookie:', error);
     return NextResponse.json({ error: 'Failed to create session' }, { status: 401 });
