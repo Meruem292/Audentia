@@ -1,10 +1,14 @@
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { verifyAdmin } from "@/lib/auth";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
+  await verifyAdmin();
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />

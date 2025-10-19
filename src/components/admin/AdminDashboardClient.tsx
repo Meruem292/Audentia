@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "../ui/skeleton";
-import { getAdminAnalyticsAction } from "@/lib/actions";
 
 interface AdminAnalytics {
   totalUsers: number;
@@ -16,14 +14,18 @@ interface AdminDashboardClientProps {
 }
 
 export default function AdminDashboardClient({ initialData }: AdminDashboardClientProps) {
-  const { user } = useAuth();
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(initialData);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This effect can be used for real-time updates in the future if needed
-  }, [user]);
+    // This can be used for real-time updates if needed in the future
+    // For now, we rely on the server-fetched initialData
+    if (initialData) {
+        setAnalytics(initialData);
+        setLoading(false);
+    }
+  }, [initialData]);
 
   const StatCard = ({ title, value, icon: Icon, description, isLoading }: { title: string, value: string | number, icon: React.ElementType, description: string, isLoading: boolean }) => (
     <Card>
