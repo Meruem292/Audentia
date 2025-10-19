@@ -7,6 +7,7 @@ import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
 import type { Reward, UserProfile } from "./types";
 import { auth } from "firebase-admin";
+import { revalidatePath } from "next/cache";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -90,7 +91,7 @@ async function seedInitialRewards() {
     const rewardsSnapshot = await rewardsRef.limit(1).get();
     if (rewardsSnapshot.empty) {
         const batch = admin.firestore().batch();
-        const defaultRewards = [
+        const defaultRewards: Omit<Reward, 'id'>[] = [
             { name: "Reusable Water Bottle", points: 1000 },
             { name: "Bamboo Toothbrush Set", points: 1500 },
             { name: "Eco-friendly Tote Bag", points: 2000 },
@@ -98,10 +99,9 @@ async function seedInitialRewards() {
             { name: "Recycled Paper Notebook", points: 800 },
             { name: "Plantable Seed Pencils", points: 1200 },
         ];
-        defaultRewards.forEach((reward, index) => {
-            const id = `item_${index + 1}`
-            const docRef = rewardsRef.doc(id);
-            batch.set(docRef, { ...reward, id });
+        defaultRewards.forEach((reward) => {
+            const docRef = rewardsRef.doc();
+            batch.set(docRef, { ...reward, id: docRef.id });
         });
         await batch.commit();
     }
@@ -110,7 +110,7 @@ async function seedInitialRewards() {
 export async function getRewardsAction() {
   try {
     await seedInitialRewards();
-    const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('id').get();
+    const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('name').get();
     const rewards = rewardsSnapshot.docs.map(doc => doc.data() as Reward);
     return { success: true, data: rewards };
   } catch (error) {
@@ -125,7 +125,7 @@ const rewardUpdateSchema = z.object({
     points: z.number().int().min(0, "Points must be a positive number"),
 });
 
-export async function updateRewardAction(reward: Omit<Reward, 'imageUrl'>) {
+export async function updateRewardAction(reward: Reward) {
   try {
     const validatedReward = rewardUpdateSchema.safeParse(reward);
     if (!validatedReward.success) {
@@ -135,9 +135,54 @@ export async function updateRewardAction(reward: Omit<Reward, 'imageUrl'>) {
     const { id, ...rewardData } = validatedReward.data;
     await admin.firestore().collection('rewards').doc(id).update(rewardData);
 
+    revalidatePath("/admin/rewards");
     return { success: true };
   } catch (error) {
     console.error("Error updating reward:", error);
     return { error: 'Failed to update reward' };
   }
+}
+
+const rewardCreateSchema = z.object({
+    name: z.string().min(1, "Name cannot be empty"),
+    points: z.number().int().min(1, "Points must be greater than zero"),
+});
+
+export async function createRewardAction(reward: Omit<Reward, 'id'>) {
+    try {
+        const validatedReward = rewardCreateSchema.safeParse(reward);
+        if (!validatedReward.success) {
+            return { error: "Invalid reward data." };
+        }
+
+        const newRewardRef = admin.firestore().collection('rewards').doc();
+        const newReward = {
+            ...validatedReward.data,
+            id: newRewardRef.id,
+        };
+        
+        await newRewardRef.set(newReward);
+
+        revalidatePath("/admin/rewards");
+        return { success: true, data: newReward };
+    } catch (error) {
+        console.error("Error creating reward:", error);
+        return { error: 'Failed to create reward' };
+    }
+}
+
+export async function deleteRewardAction(rewardId: string) {
+    try {
+        if(!rewardId) {
+            return { error: "Invalid reward ID." };
+        }
+        
+        await admin.firestore().collection('rewards').doc(rewardId).delete();
+
+        revalidatePath("/admin/rewards");
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting reward:", error);
+        return { error: 'Failed to delete reward' };
+    }
 }
