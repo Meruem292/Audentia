@@ -6,25 +6,14 @@ import Features from '@/components/landing/Features';
 import HowItWorks from '@/components/landing/HowItWorks';
 import CTA from '@/components/landing/CTA';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
 export default function Home() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    // If the user is logged in, redirect them to their dashboard.
-    // The server will handle role-based redirection from there.
-    if (!loading && user) {
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
+  const { loading } = useAuth();
 
 
-  if (loading || user) {
+  if (loading) {
     return (
         <div className="flex flex-col gap-8 container py-8">
             <Skeleton className="h-[400px] w-full" />

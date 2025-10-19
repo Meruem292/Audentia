@@ -1,35 +1,26 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { getAuth } from "firebase-admin/auth";
-import admin from "@/lib/firebase/admin"; // Initialise admin app
-
-async function verifyUserSession() {
-  const sessionCookie = cookies().get("session")?.value;
-
-  if (!sessionCookie) {
-    redirect("/login");
-  }
-
-  try {
-    const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
-    // If user is an admin, redirect them to the admin dashboard
-    if (decodedClaims.role === "admin") {
-      redirect("/admin/dashboard");
-    }
-    return decodedClaims;
-  } catch (error) {
-    // Session cookie is invalid or expired.
-    console.error("Session verification failed:", error);
-    redirect("/login");
-  }
-}
+import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
+import { verifyUser } from "@/lib/auth-user";
+import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await verifyUserSession();
+  const user = await verifyUser();
 
-  return <>{children}</>;
+  if (user.role === 'admin') {
+    redirect('/admin/dashboard');
+  }
+
+  return (
+    <div className="flex min-h-screen">
+      <DashboardSidebar />
+      <main className="flex-1 bg-muted/40 p-4 sm:p-6 md:p-8">
+        <div className="mx-auto max-w-7xl">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }

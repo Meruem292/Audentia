@@ -28,7 +28,7 @@ const formSchema = z.object({
     .min(1, { message: "Password is required." }),
 });
 
-async function createSession(idToken: string): Promise<{role: 'admin' | 'user'}> {
+async function createSession(idToken: string) {
     const response = await fetch('/api/auth/session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,7 +36,8 @@ async function createSession(idToken: string): Promise<{role: 'admin' | 'user'}>
     });
 
     if (!response.ok) {
-        throw new Error('Failed to create session');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create session');
     }
     
     return await response.json();
@@ -62,13 +63,10 @@ export function LoginForm() {
       const user = userCredential.user;
       
       const idToken = await user.getIdToken();
-      const { role } = await createSession(idToken);
+      await createSession(idToken);
 
-      if (role === 'admin') {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      // Redirect to the generic dashboard, server will handle role-based routing
+      router.push("/dashboard");
 
     } catch (error: any) {
       toast({

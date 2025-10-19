@@ -4,22 +4,12 @@
 import { LoginForm } from "@/components/auth/LoginForm";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LoginPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { loading } = useAuth();
 
-  useEffect(() => {
-    // If a user is already logged in, redirect them away from the login page.
-    if (!loading && user) {
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
-
-  if (loading || user) {
+  if (loading) {
     return (
       <div className="flex min-h-[calc(100vh-112px)] items-center justify-center p-4">
         <div className="w-full max-w-md space-y-4">

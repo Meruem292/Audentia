@@ -33,6 +33,8 @@ export default function Header() {
 
   const handleSignOut = async () => {
     await signOut(auth);
+    // After sign-out, clear session on server and redirect to home
+    await fetch('/api/auth/session', { method: 'DELETE' });
     router.push("/");
   };
 
@@ -41,7 +43,7 @@ export default function Header() {
     { href: "/#how-it-works", label: "How It Works" },
   ];
 
-  const logoHref = user ? "/dashboard" : "/";
+  const logoHref = "/";
 
   const renderAuthButtons = () => {
     if (loading) {
@@ -113,19 +115,17 @@ export default function Header() {
             <span className="font-bold">EcoVend</span>
           </Link>
         </div>
-        {!user && (
-           <nav className="hidden items-center gap-4 text-sm md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        )}
+        <nav className="hidden items-center gap-4 text-sm md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
         <div className="flex flex-1 items-center justify-end gap-4">
           <div className="hidden md:flex">{renderAuthButtons()}</div>
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -147,20 +147,18 @@ export default function Header() {
                   <Recycle className="h-6 w-6 text-primary" />
                   <span className="font-bold">EcoVend</span>
                 </Link>
-                {!user && (
-                    <div className="flex flex-col gap-2">
-                    {navLinks.map((link) => (
-                        <Link
-                        key={link.href}
-                        href={link.href}
-                        className="text-lg"
-                        onClick={() => setIsSheetOpen(false)}
-                        >
-                        {link.label}
-                        </Link>
-                    ))}
-                    </div>
-                )}
+                <div className="flex flex-col gap-2">
+                {navLinks.map((link) => (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-lg"
+                    onClick={() => setIsSheetOpen(false)}
+                    >
+                    {link.label}
+                    </Link>
+                ))}
+                </div>
                 <div className="mt-auto flex flex-col gap-2">{renderMobileAuth()}</div>
               </div>
             </SheetContent>
