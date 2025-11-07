@@ -17,11 +17,12 @@ export interface Reward {
 
 export interface Transaction {
   id: string;
-  details: string;
-  pointsChange: number;
-  timestamp: number;
-  transactionType: 'BOTTLE_INSERTION' | 'REWARD_DISPENSE';
-  userId: string;
+  plasticBottleCount?: number;
+  pointsEarned: number;
+  status: 'valid' | 'invalid' | 'dispensed';
+  timestamp: Date;
+  userId: string; // This is the six-digit ID
+  details?: string; // For reward dispensing details
 }
 
 

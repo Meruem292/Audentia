@@ -8,8 +8,6 @@ import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-me
 import type { Reward, Transaction, UserProfile } from "./types";
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { getAuth } from "firebase-admin/auth";
 import { verifyAdmin } from "./auth";
 import { verifyUser } from "./auth-user";
 
@@ -181,19 +179,24 @@ export async function getTransactionsAction() {
         }
         const userProfile = userDoc.data() as UserProfile;
 
-        const db = admin.database();
-        const ref = db.ref('transaction_history');
-        const snapshot = await ref.orderByChild('userId').equalTo(userProfile.sixDigitId).get();
+        const transactionsSnapshot = await admin.firestore()
+            .collection('transactions')
+            .where('userId', '==', userProfile.sixDigitId)
+            .orderBy('timestamp', 'desc')
+            .get();
 
-        if (!snapshot.exists()) {
+        if (transactionsSnapshot.empty) {
             return { success: true, data: [] };
         }
 
-        const historyData = snapshot.val();
-        const transactions: Transaction[] = Object.keys(historyData).map(key => ({
-            id: key,
-            ...historyData[key]
-        })).sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+        const transactions = transactionsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: (data.timestamp as Timestamp).toDate(),
+            } as Transaction;
+        });
         
         return { success: true, data: transactions };
 
@@ -219,19 +222,23 @@ export async function getRewardsAction() {
 export async function getAdminTransactionsAction() {
     try {
         await verifyAdmin();
-        const db = admin.database();
-        const ref = db.ref('transaction_history');
-        const snapshot = await ref.get();
+        const transactionsSnapshot = await admin.firestore()
+            .collection('transactions')
+            .orderBy('timestamp', 'desc')
+            .get();
 
-        if (!snapshot.exists()) {
+        if (transactionsSnapshot.empty) {
             return { success: true, data: [] };
         }
         
-        const historyData = snapshot.val();
-        const transactions: Transaction[] = Object.keys(historyData).map(key => ({
-            id: key,
-            ...historyData[key]
-        })).sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+        const transactions = transactionsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                timestamp: (data.timestamp as Timestamp).toDate(),
+            } as Transaction;
+        });
 
         return { success: true, data: transactions };
 

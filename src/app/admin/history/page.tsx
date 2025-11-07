@@ -1,4 +1,3 @@
-
 import { getAdminTransactionsAction } from "@/lib/actions";
 import {
   Table,
@@ -32,6 +31,18 @@ export default async function AdminHistoryPage() {
     )
   }
 
+  const getTransactionType = (tx: (typeof transactions)[0]) => {
+    if (tx.pointsEarned > 0) return { label: 'BOTTLE INSERTION', variant: 'default' } as const;
+    if (tx.pointsEarned < 0) return { label: 'REWARD DISPENSE', variant: 'secondary' } as const;
+    return { label: 'SYSTEM', variant: 'outline' } as const;
+  }
+  
+  const getTransactionDetails = (tx: (typeof transactions)[0]) => {
+     if(tx.details) return tx.details;
+     if(tx.plasticBottleCount) return `Bottles: ${tx.plasticBottleCount}`;
+     return 'N/A';
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -46,11 +57,14 @@ export default async function AdminHistoryPage() {
               <TableHead>User ID</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Details</TableHead>
+               <TableHead>Status</TableHead>
               <TableHead className="text-right">Points</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((tx) => (
+            {transactions.map((tx) => {
+               const type = getTransactionType(tx);
+              return (
               <TableRow key={tx.id}>
                 <TableCell>
                   {new Date(tx.timestamp).toLocaleDateString("en-US", {
@@ -60,16 +74,21 @@ export default async function AdminHistoryPage() {
                 </TableCell>
                 <TableCell>{tx.userId}</TableCell>
                 <TableCell>
-                  <Badge variant={tx.transactionType === 'BOTTLE_INSERTION' ? 'default' : 'secondary'}>
-                    {tx.transactionType.replace('_', ' ')}
+                  <Badge variant={type.variant}>
+                    {type.label.replace('_', ' ')}
                   </Badge>
                 </TableCell>
-                <TableCell>{tx.details}</TableCell>
-                <TableCell className={cn("text-right font-medium", tx.pointsChange > 0 ? 'text-primary' : 'text-destructive')}>
-                    {tx.pointsChange > 0 ? '+' : ''}{tx.pointsChange.toLocaleString()}
+                <TableCell>{getTransactionDetails(tx)}</TableCell>
+                <TableCell>
+                    <Badge variant={tx.status === 'valid' || tx.status === 'dispensed' ? 'default' : 'destructive'}>
+                        {tx.status}
+                    </Badge>
+                </TableCell>
+                <TableCell className={cn("text-right font-medium", tx.pointsEarned > 0 ? 'text-primary' : 'text-destructive')}>
+                    {tx.pointsEarned > 0 ? '+' : ''}{tx.pointsEarned.toLocaleString()}
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </div>
