@@ -119,7 +119,6 @@ export default function AdminDashboardPage() {
                     <Table>
                     <TableHeader>
                         <TableRow>
-                        <TableHead>Date</TableHead>
                         <TableHead>User ID</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Details</TableHead>
@@ -133,12 +132,6 @@ export default function AdminDashboardPage() {
                         const pointsChange = getPointsChange(tx);
                         return (
                         <TableRow key={tx.id}>
-                            <TableCell>
-                            {new Date(tx.timestamp).toLocaleDateString("en-US", {
-                                year: 'numeric', month: 'long', day: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                            })}
-                            </TableCell>
                             <TableCell>{tx.userId}</TableCell>
                             <TableCell>
                             <Badge variant={type.variant}>

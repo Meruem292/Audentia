@@ -62,7 +62,6 @@ export default async function HistoryPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Details</TableHead>
               <TableHead>Status</TableHead>
@@ -75,11 +74,6 @@ export default async function HistoryPage() {
               const pointsChange = getPointsChange(tx);
               return (
               <TableRow key={tx.id}>
-                <TableCell>
-                  {new Date(tx.timestamp).toLocaleDateString("en-US", {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                  })}
-                </TableCell>
                 <TableCell>
                   <Badge variant={type.variant}>
                     {type.label.replace('_', ' ')}
