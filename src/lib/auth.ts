@@ -26,4 +26,3 @@ export async function verifyAdmin() {
     redirect("/login");
   }
 }
-
