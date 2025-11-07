@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     // Fetch the user document from Firestore to get the role
     const userDoc = await admin.firestore().collection('users').doc(uid).get();
     if (!userDoc.exists) {
+      // This case might happen if a user is created in Auth but their Firestore document fails to be created.
       return NextResponse.json({ error: 'User data not found in Firestore.' }, { status: 404 });
     }
     
