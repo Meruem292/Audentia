@@ -15,7 +15,7 @@ export async function verifyAdmin() {
     const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
     const userDoc = await admin.firestore().collection("users").doc(decodedClaims.uid).get();
 
-    if (!userDoc.exists() || userDoc.data()?.role !== "admin") {
+    if (!userDoc.exists || userDoc.data()?.role !== "admin") {
       redirect("/dashboard"); // Redirect non-admins
     }
     
@@ -26,3 +26,4 @@ export async function verifyAdmin() {
     redirect("/login");
   }
 }
+
