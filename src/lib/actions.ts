@@ -3,7 +3,7 @@
 
 import * as z from "zod";
 import admin from "@/lib/firebase/admin";
-import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
 import type { Reward, Transaction, UserProfile } from "./types";
 import { auth } from "firebase-admin";
@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getAuth } from "firebase-admin/auth";
 import { verifyAdmin } from "./auth";
+import { verifyUser } from "./auth-user";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -170,30 +171,19 @@ export async function deleteRewardAction(rewardId: string) {
     }
 }
 
-async function getCurrentUser() {
-    const sessionCookie = cookies().get("session")?.value;
-    if (!sessionCookie) return null;
-    try {
-        const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
-        const userDoc = await admin.firestore().collection('users').doc(decodedClaims.uid).get();
-        if (!userDoc.exists) return null;
-        return userDoc.data() as UserProfile;
-    } catch (error) {
-        return null;
-    }
-}
-
-
 export async function getTransactionsAction() {
     try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return { error: 'User not found' };
+        const user = await verifyUser();
+        const userDoc = await admin.firestore().collection('users').doc(user.uid).get();
+
+        if (!userDoc.exists) {
+            return { error: 'User not found in Firestore' };
         }
-        
+        const userProfile = userDoc.data() as UserProfile;
+
         const db = admin.database();
         const ref = db.ref('transaction_history');
-        const snapshot = await ref.orderByChild('userId').equalTo(user.sixDigitId).get();
+        const snapshot = await ref.orderByChild('userId').equalTo(userProfile.sixDigitId).get();
 
         if (!snapshot.exists()) {
             return { success: true, data: [] };
@@ -208,6 +198,7 @@ export async function getTransactionsAction() {
         return { success: true, data: transactions };
 
     } catch (error: any) {
+        if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
         console.error("Error fetching transaction history:", { message: error.message, code: error.code, stack: error.stack });
         return { error: 'Failed to fetch transaction history' };
     }
@@ -252,5 +243,3 @@ export async function getAdminTransactionsAction() {
         return { error: 'Failed to fetch transaction history' };
     }
 }
-
-    

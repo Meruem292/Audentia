@@ -16,7 +16,7 @@ export async function verifyAdmin() {
     const userDoc = await admin.firestore().collection("users").doc(decodedClaims.uid).get();
 
     if (!userDoc.exists || userDoc.data()?.role !== "admin") {
-      redirect("/dashboard"); // Redirect non-admins
+      redirect("/dashboard"); // Redirect non-admins or if doc doesn't exist
     }
     
     return decodedClaims;
