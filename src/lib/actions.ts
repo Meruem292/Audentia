@@ -10,6 +10,7 @@ import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getAuth } from "firebase-admin/auth";
+import { verifyAdmin } from "./auth";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -113,7 +114,7 @@ export async function getAdminRewardsAction() {
   try {
     await seedInitialRewards();
     const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('name').get();
-    const rewards = rewardsSnapshot.docs.map(doc => doc.data() as Reward);
+    const rewards = rewardsSnapshot.docs.map(doc => ({...doc.data(), id: doc.id} as Reward));
     return { success: true, data: rewards };
   } catch (error) {
     console.error("Error fetching rewards:", error);
@@ -196,10 +197,26 @@ export async function getRewardsAction() {
     try {
         await seedInitialRewards();
         const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('points').get();
-        const rewards = rewardsSnapshot.docs.map(doc => doc.data() as Reward);
+        const rewards = rewardsSnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Reward));
         return { success: true, data: rewards };
     } catch (error) {
         console.error("Error fetching rewards:", error);
         return { error: 'Failed to fetch rewards' };
+    }
+}
+
+export async function getAdminTransactionsAction() {
+    try {
+        await verifyAdmin();
+        const historySnapshot = await admin.firestore().collection('transaction_history').orderBy('timestamp', 'desc').get();
+        const transactions = historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+        return { success: true, data: transactions };
+
+    } catch (error: any) {
+         if (error.digest?.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
+        console.error("Error fetching admin transaction history:", error);
+        return { error: 'Failed to fetch transaction history' };
     }
 }
