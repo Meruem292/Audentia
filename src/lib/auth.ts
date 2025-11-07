@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuth } from "firebase-admin/auth";
-import admin from "@/lib/firebase/admin"; // In case you need it for other checks
+import admin from "@/lib/firebase/admin"; 
 
 export async function verifyAdmin() {
   const sessionCookie = cookies().get("session")?.value;
@@ -12,9 +12,12 @@ export async function verifyAdmin() {
 
   try {
     const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
-    if (decodedClaims.role !== "admin") {
-      redirect("/dashboard"); // Redirect non-admins to their dashboard
+    const userDoc = await admin.firestore().collection("users").doc(decodedClaims.uid).get();
+
+    if (!userDoc.exists || userDoc.data()?.role !== "admin") {
+      redirect("/dashboard"); // Redirect non-admins
     }
+    
     return decodedClaims;
   } catch (error) {
     // Session cookie is invalid or expired.
