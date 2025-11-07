@@ -183,8 +183,20 @@ export async function getTransactionsAction() {
             return { error: 'User not found' };
         }
         
-        const historySnapshot = await admin.firestore().collection('transaction_history').where('userId', '==', user.sixDigitId).orderBy('timestamp', 'desc').get();
-        const transactions = historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+        const db = admin.database();
+        const ref = db.ref('transaction_history');
+        const snapshot = await ref.orderByChild('userId').equalTo(user.sixDigitId).get();
+
+        if (!snapshot.exists()) {
+            return { success: true, data: [] };
+        }
+
+        const historyData = snapshot.val();
+        const transactions: Transaction[] = Object.keys(historyData).map(key => ({
+            id: key,
+            ...historyData[key]
+        })).sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+        
         return { success: true, data: transactions };
 
     } catch (error) {
@@ -208,8 +220,20 @@ export async function getRewardsAction() {
 export async function getAdminTransactionsAction() {
     try {
         await verifyAdmin();
-        const historySnapshot = await admin.firestore().collection('transaction_history').orderBy('timestamp', 'desc').get();
-        const transactions = historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+        const db = admin.database();
+        const ref = db.ref('transaction_history');
+        const snapshot = await ref.get();
+
+        if (!snapshot.exists()) {
+            return { success: true, data: [] };
+        }
+        
+        const historyData = snapshot.val();
+        const transactions: Transaction[] = Object.keys(historyData).map(key => ({
+            id: key,
+            ...historyData[key]
+        })).sort((a, b) => b.timestamp - a.timestamp); // Sort by newest first
+
         return { success: true, data: transactions };
 
     } catch (error: any) {
