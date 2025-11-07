@@ -1,3 +1,4 @@
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAuth } from "firebase-admin/auth";
@@ -14,7 +15,7 @@ export async function verifyAdmin() {
     const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
     const userDoc = await admin.firestore().collection("users").doc(decodedClaims.uid).get();
 
-    if (!userDoc.exists || userDoc.data()?.role !== "admin") {
+    if (!userDoc.exists() || userDoc.data()?.role !== "admin") {
       redirect("/dashboard"); // Redirect non-admins
     }
     
