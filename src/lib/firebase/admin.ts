@@ -8,7 +8,7 @@ config();
 try {
   if (!admin.apps.length) {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && privateKey) {
+    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && privateKey && process.env.FIREBASE_DATABASE_URL) {
       admin.initializeApp({
         credential: admin.credential.cert({
           projectId: process.env.FIREBASE_PROJECT_ID,
