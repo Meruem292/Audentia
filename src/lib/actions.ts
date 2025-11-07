@@ -112,11 +112,13 @@ async function seedInitialRewards() {
 
 export async function getAdminRewardsAction() {
   try {
+    await verifyAdmin();
     await seedInitialRewards();
     const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('name').get();
     const rewards = rewardsSnapshot.docs.map(doc => ({...doc.data(), id: doc.id} as Reward));
     return { success: true, data: rewards };
-  } catch (error) {
+  } catch (error: any) {
+     if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
     console.error("Error fetching rewards:", error);
     return { error: 'Failed to fetch rewards' };
   }
@@ -130,6 +132,7 @@ const rewardUpdateSchema = z.object({
 
 export async function updateRewardAction(reward: Reward) {
   try {
+    await verifyAdmin();
     const validatedReward = rewardUpdateSchema.safeParse(reward);
     if (!validatedReward.success) {
       return { error: "Invalid reward data." };
@@ -139,8 +142,10 @@ export async function updateRewardAction(reward: Reward) {
     await admin.firestore().collection('rewards').doc(id).update(rewardData);
 
     revalidatePath("/admin/rewards");
+    revalidatePath("/dashboard/rewards");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
+    if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
     console.error("Error updating reward:", error);
     return { error: 'Failed to update reward' };
   }
@@ -148,6 +153,7 @@ export async function updateRewardAction(reward: Reward) {
 
 export async function deleteRewardAction(rewardId: string) {
     try {
+        await verifyAdmin();
         if(!rewardId) {
             return { error: "Invalid reward ID." };
         }
@@ -155,8 +161,10 @@ export async function deleteRewardAction(rewardId: string) {
         await admin.firestore().collection('rewards').doc(rewardId).delete();
 
         revalidatePath("/admin/rewards");
+        revalidatePath("/dashboard/rewards");
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
         console.error("Error deleting reward:", error);
         return { error: 'Failed to delete reward' };
     }
@@ -219,7 +227,7 @@ export async function getRewardsAction() {
 
 export async function getAdminTransactionsAction() {
     try {
-        await verifyAdmin(); // Ensure the user is an admin before proceeding
+        await verifyAdmin();
         const db = admin.database();
         const ref = db.ref('transaction_history');
         const snapshot = await ref.get();
@@ -238,10 +246,11 @@ export async function getAdminTransactionsAction() {
 
     } catch (error: any) {
          if (error.digest?.includes('NEXT_REDIRECT')) {
-            // This is a normal part of Next.js flow, re-throw it.
             throw error;
         }
         console.error("Error fetching admin transaction history:", { message: error.message, code: error.code, stack: error.stack });
         return { error: 'Failed to fetch transaction history' };
     }
 }
+
+    
