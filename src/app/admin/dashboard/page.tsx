@@ -1,15 +1,26 @@
 
+
 "use client";
 
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getAdminTransactionsAction } from "@/lib/actions";
+import { Transaction } from "@/lib/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface AdminAnalytics {
   totalUsers: number;
@@ -21,6 +32,10 @@ export default function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsError, setTransactionsError] = useState<string | null>(null);
+
 
   useEffect(() => {
     async function fetchAnalytics() {
@@ -46,8 +61,33 @@ export default function AdminDashboardPage() {
       }
     }
 
+    async function fetchTransactions() {
+        setTransactionsLoading(true);
+        const { data, error } = await getAdminTransactionsAction();
+        if (error) {
+            setTransactionsError(error);
+        } else if (data) {
+            setTransactions(data);
+        }
+        setTransactionsLoading(false);
+    }
+
     fetchAnalytics();
+    fetchTransactions();
   }, [user]);
+
+  const getTransactionType = (tx: Transaction) => {
+    if (tx.pointsEarned > 0) return { label: 'BOTTLE INSERTION', variant: 'default' } as const;
+    if (tx.pointsEarned < 0) return { label: 'REWARD DISPENSE', variant: 'secondary' } as const;
+    return { label: 'SYSTEM', variant: 'outline' } as const;
+  }
+
+  const getTransactionDetails = (tx: Transaction) => {
+     if(tx.details) return tx.details;
+     if(tx.plasticBottleCount) return `Bottles: ${tx.plasticBottleCount}`;
+     return 'N/A';
+  }
+
 
   return (
     <div className="flex flex-col gap-8">
@@ -58,6 +98,64 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <AdminDashboardClient initialData={analytics} isLoading={loading} error={error} />
       </div>
+
+       <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">Transaction History</h2>
+        <Card>
+            <CardContent className="p-0">
+                {transactionsLoading && <p className="p-4">Loading transactions...</p>}
+                {transactionsError && <p className="p-4 text-destructive">{transactionsError}</p>}
+                {!transactionsLoading && !transactionsError && transactions.length === 0 && (
+                    <p className="p-8 text-center">No transactions found.</p>
+                )}
+                {!transactionsLoading && !transactionsError && transactions.length > 0 && (
+                 <div className="border-t rounded-lg">
+                    <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>User ID</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Details</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {transactions.map((tx) => {
+                        const type = getTransactionType(tx);
+                        return (
+                        <TableRow key={tx.id}>
+                            <TableCell>
+                            {new Date(tx.timestamp).toLocaleDateString("en-US", {
+                                year: 'numeric', month: 'long', day: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            })}
+                            </TableCell>
+                            <TableCell>{tx.userId}</TableCell>
+                            <TableCell>
+                            <Badge variant={type.variant}>
+                                {type.label.replace('_', ' ')}
+                            </Badge>
+                            </TableCell>
+                            <TableCell>{getTransactionDetails(tx)}</TableCell>
+                            <TableCell>
+                                <Badge variant={tx.status === 'valid' || tx.status === 'dispensed' ? 'default' : 'destructive'}>
+                                    {tx.status}
+                                </Badge>
+                            </TableCell>
+                            <TableCell className={cn("text-right font-medium", tx.pointsEarned > 0 ? 'text-primary' : 'text-destructive')}>
+                                {tx.pointsEarned > 0 ? '+' : ''}{tx.pointsEarned.toLocaleString()}
+                            </TableCell>
+                        </TableRow>
+                        )})}
+                    </TableBody>
+                    </Table>
+                </div>
+                )}
+            </CardContent>
+        </Card>
+       </div>
     </div>
   );
 }

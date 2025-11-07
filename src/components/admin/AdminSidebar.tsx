@@ -1,15 +1,15 @@
 
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Gift, History } from "lucide-react";
+import { Home, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: Home },
   { href: "/admin/rewards", label: "Rewards", icon: Gift },
-  { href: "/admin/history", label: "History", icon: History },
 ];
 
 export default function AdminSidebar() {
