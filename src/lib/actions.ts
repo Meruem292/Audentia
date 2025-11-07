@@ -199,8 +199,8 @@ export async function getTransactionsAction() {
         
         return { success: true, data: transactions };
 
-    } catch (error) {
-        console.error("Error fetching transaction history:", error);
+    } catch (error: any) {
+        console.error("Error fetching transaction history:", { message: error.message, code: error.code });
         return { error: 'Failed to fetch transaction history' };
     }
 }
@@ -240,7 +240,7 @@ export async function getAdminTransactionsAction() {
          if (error.digest?.includes('NEXT_REDIRECT')) {
             throw error;
         }
-        console.error("Error fetching admin transaction history:", error);
+        console.error("Error fetching admin transaction history:", { message: error.message, code: error.code });
         return { error: 'Failed to fetch transaction history' };
     }
 }
