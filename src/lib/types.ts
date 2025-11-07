@@ -15,6 +15,16 @@ export interface Reward {
     points: number;
 }
 
+export interface Transaction {
+  id: string;
+  details: string;
+  pointsChange: number;
+  timestamp: number;
+  transactionType: 'BOTTLE_INSERTION' | 'REWARD_DISPENSE';
+  userId: string;
+}
+
+
 declare module "firebase-admin/auth" {
   interface DecodedIdToken {
     role?: 'user' | 'admin';

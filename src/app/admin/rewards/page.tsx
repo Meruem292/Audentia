@@ -1,8 +1,8 @@
 import RewardsClient from "@/components/admin/RewardsClient";
-import { getRewardsAction } from "@/lib/actions";
+import { getAdminRewardsAction } from "@/lib/actions";
 
 export default async function RewardsPage() {
-  const { data: rewards, error } = await getRewardsAction();
+  const { data: rewards, error } = await getAdminRewardsAction();
 
   if (error) {
     return <p className="text-destructive">{error}</p>;
@@ -16,7 +16,7 @@ export default async function RewardsPage() {
           Update the items and points for the reward dispenser.
         </p>
       </div>
-      <RewardsClient initialRewards={rewards} />
+      <RewardsClient initialRewards={rewards || []} />
     </div>
   );
 }

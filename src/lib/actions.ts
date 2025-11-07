@@ -5,9 +5,11 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, UserProfile } from "./types";
+import type { Reward, Transaction, UserProfile } from "./types";
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { getAuth } from "firebase-admin/auth";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -107,7 +109,7 @@ async function seedInitialRewards() {
     }
 }
 
-export async function getRewardsAction() {
+export async function getAdminRewardsAction() {
   try {
     await seedInitialRewards();
     const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('name').get();
@@ -156,5 +158,48 @@ export async function deleteRewardAction(rewardId: string) {
     } catch (error) {
         console.error("Error deleting reward:", error);
         return { error: 'Failed to delete reward' };
+    }
+}
+
+async function getCurrentUser() {
+    const sessionCookie = cookies().get("session")?.value;
+    if (!sessionCookie) return null;
+    try {
+        const decodedClaims = await getAuth().verifySessionCookie(sessionCookie, true);
+        const userDoc = await admin.firestore().collection('users').doc(decodedClaims.uid).get();
+        if (!userDoc.exists) return null;
+        return userDoc.data() as UserProfile;
+    } catch (error) {
+        return null;
+    }
+}
+
+
+export async function getTransactionsAction() {
+    try {
+        const user = await getCurrentUser();
+        if (!user) {
+            return { error: 'User not found' };
+        }
+        
+        const historySnapshot = await admin.firestore().collection('transaction_history').where('userId', '==', user.sixDigitId).orderBy('timestamp', 'desc').get();
+        const transactions = historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+        return { success: true, data: transactions };
+
+    } catch (error) {
+        console.error("Error fetching transaction history:", error);
+        return { error: 'Failed to fetch transaction history' };
+    }
+}
+
+export async function getRewardsAction() {
+    try {
+        await seedInitialRewards();
+        const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('points').get();
+        const rewards = rewardsSnapshot.docs.map(doc => doc.data() as Reward);
+        return { success: true, data: rewards };
+    } catch (error) {
+        console.error("Error fetching rewards:", error);
+        return { error: 'Failed to fetch rewards' };
     }
 }
