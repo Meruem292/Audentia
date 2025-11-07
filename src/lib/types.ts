@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export interface UserProfile {
@@ -17,12 +18,18 @@ export interface Reward {
 
 export interface Transaction {
   id: string;
-  plasticBottleCount?: number;
-  pointsEarned: number;
-  status: 'valid' | 'invalid' | 'dispensed';
   timestamp: Date;
   userId: string; // This is the six-digit ID
-  details?: string; // For reward dispensing details
+  status: 'valid' | 'invalid' | 'dispensed';
+  
+  // Fields for bottle insertion
+  plasticBottleCount?: number;
+  pointsEarned?: number;
+
+  // Fields for reward dispense
+  pointsUsed?: number;
+  dispenserIndex?: number;
+  details?: string;
 }
 
 

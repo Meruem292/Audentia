@@ -233,10 +233,13 @@ export async function getAdminTransactionsAction() {
         
         const transactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
+            // Firestore timestamps need to be converted to JS Date objects
+            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(data.timestamp);
+            
             return {
                 id: doc.id,
                 ...data,
-                timestamp: (data.timestamp as Timestamp).toDate(),
+                timestamp: timestamp,
             } as Transaction;
         });
 
@@ -246,7 +249,7 @@ export async function getAdminTransactionsAction() {
          if (error.digest?.includes('NEXT_REDIRECT')) {
             throw error;
         }
-        console.error("Error fetching admin transaction history:", { message: error.message, code: error.code, stack: error.stack });
+        console.error("Error fetching admin transaction history:", error);
         return { error: 'Failed to fetch transaction history' };
     }
 }
