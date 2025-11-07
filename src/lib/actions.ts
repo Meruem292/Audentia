@@ -200,7 +200,7 @@ export async function getTransactionsAction() {
         return { success: true, data: transactions };
 
     } catch (error: any) {
-        console.error("Error fetching transaction history:", { message: error.message, code: error.code });
+        console.error("Error fetching transaction history:", { message: error.message, code: error.code, stack: error.stack });
         return { error: 'Failed to fetch transaction history' };
     }
 }
@@ -219,7 +219,7 @@ export async function getRewardsAction() {
 
 export async function getAdminTransactionsAction() {
     try {
-        await verifyAdmin();
+        await verifyAdmin(); // Ensure the user is an admin before proceeding
         const db = admin.database();
         const ref = db.ref('transaction_history');
         const snapshot = await ref.get();
@@ -238,9 +238,10 @@ export async function getAdminTransactionsAction() {
 
     } catch (error: any) {
          if (error.digest?.includes('NEXT_REDIRECT')) {
+            // This is a normal part of Next.js flow, re-throw it.
             throw error;
         }
-        console.error("Error fetching admin transaction history:", { message: error.message, code: error.code });
+        console.error("Error fetching admin transaction history:", { message: error.message, code: error.code, stack: error.stack });
         return { error: 'Failed to fetch transaction history' };
     }
 }
