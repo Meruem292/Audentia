@@ -194,7 +194,7 @@ export async function getTransactionsAction() {
             return {
                 id: doc.id,
                 ...data,
-                timestamp: (data.timestamp as Timestamp).toDate(),
+                timestamp: (data.timestamp as Timestamp)?.toDate() ?? new Date(0),
             } as Transaction;
         });
         
@@ -234,7 +234,7 @@ export async function getAdminTransactionsAction() {
         const transactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
             // Firestore timestamps need to be converted to JS Date objects
-            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(data.timestamp);
+            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(data.timestamp || 0);
             
             return {
                 id: doc.id,
