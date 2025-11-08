@@ -233,7 +233,6 @@ export async function getAdminTransactionsAction() {
         
         const transactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
-            // Firestore timestamps need to be converted to JS Date objects
             const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(data.timestamp || 0);
             
             return {
