@@ -10,9 +10,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
@@ -23,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Recycle, User } from "lucide-react";
+import { Menu, Recycle, User, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -34,21 +31,20 @@ export default function Header() {
 
   const handleSignOut = async () => {
     await signOut(auth);
-    // After sign-out, clear session on server and redirect to home
     await fetch('/api/auth/session', { method: 'DELETE' });
     router.push("/");
   };
-
-  const navLinks = [
-    { href: "/#features", label: "Features" },
-    { href: "/#how-it-works", label: "How It Works" },
-  ];
 
   const logoHref = user ? "/dashboard" : "/";
 
   const renderAuthButtons = () => {
     if (loading) {
-      return <div className="h-10 w-24 animate-pulse rounded-md bg-muted" />;
+      return (
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-10 w-28" />
+        </div>
+      );
     }
     if (user) {
       return (
@@ -77,10 +73,12 @@ export default function Header() {
     return (
       <div className="flex items-center gap-2">
         <Button variant="ghost" asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/login">Sign In</Link>
         </Button>
         <Button asChild>
-          <Link href="/signup">Sign Up</Link>
+          <Link href="/signup">
+            Get Started <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
         </Button>
       </div>
     );
@@ -92,17 +90,20 @@ export default function Header() {
     }
     if (user) {
       return (
-        <div className="flex flex-col gap-2">
-            <Link href="/dashboard" className="text-lg" onClick={() => setIsSheetOpen(false)}>Dashboard</Link>
-            <Link href="/dashboard/settings" className="text-lg" onClick={() => setIsSheetOpen(false)}>Settings</Link>
-            <Button onClick={() => { handleSignOut(); setIsSheetOpen(false); }}>Logout</Button>
+        <div className="flex flex-col gap-4">
+            <Button variant="outline" onClick={() => { router.push('/dashboard'); setIsSheetOpen(false); }}>Dashboard</Button>
+            <Button variant="ghost" onClick={() => { handleSignOut(); setIsSheetOpen(false); }}>Logout</Button>
         </div>
       );
     }
     return (
-      <div className="flex flex-col gap-2">
-         <Button variant="ghost" asChild onClick={() => setIsSheetOpen(false)}><Link href="/login">Login</Link></Button>
-         <Button asChild onClick={() => setIsSheetOpen(false)}><Link href="/signup">Sign Up</Link></Button>
+      <div className="flex flex-col gap-4">
+         <Button variant="outline" asChild onClick={() => setIsSheetOpen(false)}><Link href="/login">Sign In</Link></Button>
+         <Button asChild onClick={() => setIsSheetOpen(false)}>
+            <Link href="/signup">
+                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+        </Button>
       </div>
     );
   };
@@ -110,65 +111,41 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <div className="mr-4 flex items-center">
+        <div className="mr-auto flex items-center">
           <Link href={logoHref} className="flex items-center gap-2">
             <Recycle className="h-6 w-6 text-primary" />
             <span className="font-bold">EcoVend</span>
           </Link>
         </div>
-        {!user && (
-            <nav className="hidden items-center gap-4 text-sm md:flex">
-            {navLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className="text-muted-foreground transition-colors hover:text-foreground"
-                >
-                {link.label}
-                </Link>
-            ))}
-            </nav>
-        )}
-        <div className="flex flex-1 items-center justify-end gap-4">
-          <div className="hidden md:flex">{renderAuthButtons()}</div>
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <SheetHeader>
-                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Main navigation links and authentication options.
-                </SheetDescription>
-              </SheetHeader>
-              <div className="flex flex-col gap-4 p-4">
-                <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
-                  <Recycle className="h-6 w-6 text-primary" />
-                  <span className="font-bold">EcoVend</span>
-                </Link>
-                {!user && (
-                    <div className="flex flex-col gap-2">
-                        {navLinks.map((link) => (
-                            <Link
-                            key={link.href}
-                            href={link.href}
-                            className="text-lg"
-                            onClick={() => setIsSheetOpen(false)}
-                            >
-                            {link.label}
-                            </Link>
-                        ))}
-                    </div>
-                )}
-                <div className="mt-auto flex flex-col gap-2">{renderMobileAuth()}</div>
-              </div>
-            </SheetContent>
-          </Sheet>
+        
+        <div className="hidden md:flex items-center justify-end gap-4">
+          {renderAuthButtons()}
         </div>
+
+        <div className="md:hidden">
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="p-6">
+                  <div className="flex flex-col h-full">
+                      <div className="mb-8">
+                        <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
+                            <Recycle className="h-6 w-6 text-primary" />
+                            <span className="font-bold">EcoVend</span>
+                        </Link>
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        {renderMobileAuth()}
+                      </div>
+                  </div>
+                </SheetContent>
+            </Sheet>
+        </div>
+
       </div>
     </header>
   );

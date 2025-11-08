@@ -1,8 +1,5 @@
 
 import Hero from '@/components/landing/Hero';
-import Features from '@/components/landing/Features';
-import HowItWorks from '@/components/landing/HowItWorks';
-import CTA from '@/components/landing/CTA';
 import { cookies } from 'next/headers';
 import { getAuth } from 'firebase-admin/auth';
 import { redirect } from 'next/navigation';
@@ -23,6 +20,9 @@ async function checkUserSession() {
 export default async function Home() {
   const user = await checkUserSession();
 
+  // The "Access Your Dashboard" button on the hero page will handle navigation
+  // for logged-in users, so a redirect here is not strictly needed,
+  // but it's good practice to keep it for users who land here directly.
   if (user) {
     if (user.role === 'admin') {
       redirect('/admin/dashboard');
@@ -34,9 +34,6 @@ export default async function Home() {
   return (
     <div className="flex flex-col">
       <Hero />
-      <Features />
-      <HowItWorks />
-      <CTA />
     </div>
   );
 }
