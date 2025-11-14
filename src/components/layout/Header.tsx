@@ -20,9 +20,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, Recycle, User, ArrowRight } from "lucide-react";
+import { Menu, User, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 export default function Header() {
   const { user, loading } = useAuth();
@@ -113,7 +114,7 @@ export default function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-auto flex items-center">
           <Link href={logoHref} className="flex items-center gap-2">
-            <Recycle className="h-6 w-6 text-primary" />
+            <Image src="/audentiaLogo.png" alt="EcoVend Logo" width={32} height={32} />
             <span className="font-bold">EcoVend</span>
           </Link>
         </div>
@@ -134,7 +135,7 @@ export default function Header() {
                   <div className="flex flex-col h-full">
                       <div className="mb-8">
                         <Link href={logoHref} className="flex items-center gap-2" onClick={() => setIsSheetOpen(false)}>
-                            <Recycle className="h-6 w-6 text-primary" />
+                            <Image src="/audentiaLogo.png" alt="EcoVend Logo" width={32} height={32} />
                             <span className="font-bold">EcoVend</span>
                         </Link>
                       </div>
