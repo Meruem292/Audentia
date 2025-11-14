@@ -6,19 +6,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
-import type { UserProfile, Transaction, Reward } from "@/lib/types";
-import { getMotivationalMessageAction, getTransactionsAction, getRewardsAction } from "@/lib/actions";
+import type { UserProfile, Reward } from "@/lib/types";
+import { getMotivationalMessageAction, getRewardsAction } from "@/lib/actions";
 import PointsCard from "./PointsCard";
 import IdCard from "./IdCard";
 import MotivationalMessage from "./MotivationalMessage";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GenerateMotivationalMessageOutput } from "@/ai/flows/generate-motivational-message";
 import { Button } from "../ui/button";
-import { RefreshCw, Star, KeyRound, BrainCircuit, Gift } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { RefreshCw, Gift } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -29,9 +26,6 @@ export default function DashboardClient() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [message, setMessage] = useState<GenerateMotivationalMessageOutput | null>(null);
   const [messageLoading, setMessageLoading] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [transactionsLoading, setTransactionsLoading] = useState(true);
-  const [transactionsError, setTransactionsError] = useState<string | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(true);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
@@ -77,17 +71,6 @@ export default function DashboardClient() {
   }, [userProfile, message])
 
   useEffect(() => {
-    async function fetchTransactions() {
-      setTransactionsLoading(true);
-      const { data, error } = await getTransactionsAction();
-      if (error) {
-        setTransactionsError(error);
-      } else if (data) {
-        setTransactions(data);
-      }
-      setTransactionsLoading(false);
-    }
-
     async function fetchRewards() {
       setRewardsLoading(true);
       const { data, error } = await getRewardsAction();
@@ -99,28 +82,8 @@ export default function DashboardClient() {
       setRewardsLoading(false);
     }
 
-    fetchTransactions();
     fetchRewards();
   }, []);
-
-  const getTransactionType = (tx: Transaction) => {
-    if (tx.pointsEarned && tx.pointsEarned > 0) return { label: 'BOTTLE INSERTION', variant: 'default' } as const;
-    if (tx.pointsUsed && tx.pointsUsed > 0) return { label: 'REWARD DISPENSE', variant: 'secondary' } as const;
-    return { label: 'SYSTEM', variant: 'outline' } as const;
-  }
-  
-  const getTransactionDetails = (tx: Transaction) => {
-     if (tx.details) return tx.details;
-     if (tx.plasticBottleCount) return `Bottles: ${tx.plasticBottleCount}`;
-     if (tx.pointsUsed) return `Dispenser: ${tx.dispenserIndex}, Cost: ${tx.pointsUsed} pts`;
-     return 'N/A';
-  }
-  
-  const getPointsChange = (tx: Transaction) => {
-    if (tx.pointsEarned) return tx.pointsEarned;
-    if (tx.pointsUsed) return -tx.pointsUsed;
-    return 0;
-  }
 
   if (loading || profileLoading) {
     return (
@@ -188,56 +151,6 @@ export default function DashboardClient() {
               <p>No rewards available at the moment. Please check back later.</p>
             </div>
           )}
-        </div>
-
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Transaction History</h2>
-            <Card>
-                <CardContent className="p-0">
-                    {transactionsLoading && <p className="p-4">Loading transactions...</p>}
-                    {transactionsError && <p className="p-4 text-destructive">{transactionsError}</p>}
-                    {!transactionsLoading && !transactionsError && transactions.length === 0 && (
-                        <p className="p-8 text-center">No transactions found.</p>
-                    )}
-                    {!transactionsLoading && !transactionsError && transactions.length > 0 && (
-                     <div className="border-t rounded-lg">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Details</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Points</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {transactions.map((tx) => {
-                                const type = getTransactionType(tx);
-                                const pointsChange = getPointsChange(tx);
-                                return (
-                                <TableRow key={tx.id}>
-                                    <TableCell>
-                                    <Badge variant={type.variant}>
-                                        {type.label.replace('_', ' ')}
-                                    </Badge>
-                                    </TableCell>
-                                    <TableCell>{getTransactionDetails(tx)}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={tx.status === 'valid' || tx.status === 'dispensed' ? 'default' : 'destructive'}>
-                                            {tx.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className={cn("text-right font-medium", pointsChange > 0 ? 'text-primary' : 'text-destructive')}>
-                                        {pointsChange > 0 ? '+' : ''}{pointsChange.toLocaleString()}
-                                    </TableCell>
-                                </TableRow>
-                                )})}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    )}
-                </CardContent>
-            </Card>
         </div>
 
         <div>

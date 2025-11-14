@@ -5,7 +5,7 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, Transaction, UserProfile } from "./types";
+import type { Reward, Transaction } from "./types";
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "./auth";
@@ -166,44 +166,6 @@ export async function deleteRewardAction(rewardId: string) {
         if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
         console.error("Error deleting reward:", error);
         return { error: 'Failed to delete reward' };
-    }
-}
-
-export async function getTransactionsAction() {
-    try {
-        const user = await verifyUser();
-        const userDoc = await admin.firestore().collection('users').doc(user.uid).get();
-
-        if (!userDoc.exists) {
-            return { error: 'User not found in Firestore' };
-        }
-        const userProfile = userDoc.data() as UserProfile;
-
-        const transactionsSnapshot = await admin.firestore()
-            .collection('transactions')
-            .where('userId', '==', userProfile.sixDigitId)
-            .orderBy('timestamp', 'desc')
-            .get();
-
-        if (transactionsSnapshot.empty) {
-            return { success: true, data: [] };
-        }
-
-        const transactions = transactionsSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                timestamp: (data.timestamp as Timestamp)?.toDate() ?? new Date(0),
-            } as Transaction;
-        });
-        
-        return { success: true, data: transactions };
-
-    } catch (error: any) {
-        if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
-        console.error("Error fetching transaction history:", { message: error.message, code: error.code, stack: error.stack });
-        return { error: 'Failed to fetch transaction history' };
     }
 }
 
