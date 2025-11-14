@@ -8,8 +8,8 @@ import {
 import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getAdminTransactionsAction } from "@/lib/actions";
-import { Transaction } from "@/lib/types";
+import { getAdminTransactionsAction, getAdminUsersAction } from "@/lib/actions";
+import { Transaction, UserProfile } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Users } from "lucide-react";
 
 interface AdminAnalytics {
   totalUsers: number;
@@ -34,6 +35,9 @@ export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [transactionsError, setTransactionsError] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -70,9 +74,21 @@ export default function AdminDashboardPage() {
         }
         setTransactionsLoading(false);
     }
+    
+    async function fetchUsers() {
+      setUsersLoading(true);
+      const { data, error } = await getAdminUsersAction();
+      if (error) {
+        setUsersError(error);
+      } else if (data) {
+        setUsers(data as UserProfile[]);
+      }
+      setUsersLoading(false);
+    }
 
     fetchAnalytics();
     fetchTransactions();
+    fetchUsers();
   }, [user]);
 
   const getTransactionType = (tx: Transaction) => {
@@ -104,6 +120,47 @@ export default function AdminDashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <AdminDashboardClient initialData={analytics} isLoading={loading} error={error} />
       </div>
+
+       <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">All Users</h2>
+        <Card>
+            <CardContent className="p-0">
+                {usersLoading && <p className="p-4">Loading users...</p>}
+                {usersError && <p className="p-4 text-destructive">{usersError}</p>}
+                {!usersLoading && !usersError && users.length === 0 && (
+                    <p className="p-8 text-center">No users found.</p>
+                )}
+                {!usersLoading && !usersError && users.length > 0 && (
+                 <div className="border-t rounded-lg">
+                    <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Unique ID</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {users.map((userItem) => (
+                        <TableRow key={userItem.uid}>
+                            <TableCell className="font-medium">{userItem.email}</TableCell>
+                            <TableCell>{userItem.sixDigitId}</TableCell>
+                            <TableCell>
+                                {new Date(userItem.createdAt.seconds * 1000).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-primary">
+                                {userItem.points.toLocaleString()}
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                    </Table>
+                </div>
+                )}
+            </CardContent>
+        </Card>
+       </div>
 
        <div className="flex flex-col gap-4">
         <h2 className="text-2xl font-bold">Transaction History</h2>

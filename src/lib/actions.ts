@@ -5,7 +5,7 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, Transaction } from "./types";
+import type { Reward, Transaction, UserProfile } from "./types";
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "./auth";
@@ -212,6 +212,21 @@ export async function getAdminTransactionsAction() {
         }
         console.error("Error fetching admin transaction history:", error);
         return { error: 'Failed to fetch transaction history' };
+    }
+}
+
+export async function getAdminUsersAction() {
+    try {
+        await verifyAdmin();
+        const usersSnapshot = await admin.firestore().collection('users').orderBy('createdAt', 'desc').get();
+        const users = usersSnapshot.docs.map(doc => doc.data() as UserProfile);
+        return { success: true, data: users };
+    } catch (error: any) {
+        if (error.digest?.includes('NEXT_REDIRECT')) {
+            throw error;
+        }
+        console.error("Error fetching users:", error);
+        return { error: 'Failed to fetch users' };
     }
 }
 
