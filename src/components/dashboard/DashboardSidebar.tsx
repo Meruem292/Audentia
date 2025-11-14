@@ -1,15 +1,13 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Settings, History, Award } from "lucide-react";
+import { Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard/home", label: "Dashboard", icon: Home },
-  { href: "/dashboard/history", label: "History", icon: History },
-  { href: "/dashboard/rewards", label: "Rewards", icon: Award },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export default function DashboardSidebar() {
