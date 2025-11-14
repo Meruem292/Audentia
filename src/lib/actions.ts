@@ -141,7 +141,7 @@ export async function updateRewardAction(reward: Reward) {
     await admin.firestore().collection('rewards').doc(id).update(rewardData);
 
     revalidatePath("/admin/rewards");
-    revalidatePath("/dashboard/rewards");
+    revalidatePath("/dashboard");
     return { success: true };
   } catch (error: any) {
     if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
@@ -160,7 +160,7 @@ export async function deleteRewardAction(rewardId: string) {
         await admin.firestore().collection('rewards').doc(rewardId).delete();
 
         revalidatePath("/admin/rewards");
-        revalidatePath("/dashboard/rewards");
+        revalidatePath("/dashboard");
         return { success: true };
     } catch (error: any) {
         if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
@@ -213,4 +213,17 @@ export async function getAdminTransactionsAction() {
         console.error("Error fetching admin transaction history:", error);
         return { error: 'Failed to fetch transaction history' };
     }
+}
+
+export async function sendPasswordResetEmailAction(email: string) {
+  try {
+    // No need to verify user here, as this is a public-facing action triggered by the user themselves.
+    // Firebase Admin SDK handles the security of generating the link.
+    await auth().generatePasswordResetLink(email);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error sending password reset email:", error);
+    // Provide a generic error message to avoid leaking information about whether an email exists.
+    return { error: "Could not send password reset email. Please try again." };
+  }
 }

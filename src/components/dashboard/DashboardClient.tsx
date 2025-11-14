@@ -7,17 +7,18 @@ import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 import type { UserProfile, Reward } from "@/lib/types";
-import { getMotivationalMessageAction, getRewardsAction } from "@/lib/actions";
+import { getMotivationalMessageAction, getRewardsAction, sendPasswordResetEmailAction } from "@/lib/actions";
 import PointsCard from "./PointsCard";
 import IdCard from "./IdCard";
 import MotivationalMessage from "./MotivationalMessage";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { GenerateMotivationalMessageOutput } from "@/ai/flows/generate-motivational-message";
 import { Button } from "../ui/button";
-import { RefreshCw, Gift } from "lucide-react";
+import { RefreshCw, Gift, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardClient() {
   const { user, loading } = useAuth();
@@ -29,6 +30,8 @@ export default function DashboardClient() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [rewardsLoading, setRewardsLoading] = useState(true);
   const [rewardsError, setRewardsError] = useState<string | null>(null);
+  const [isPasswordResetLoading, setIsPasswordResetLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -53,7 +56,7 @@ export default function DashboardClient() {
       });
       return () => unsub();
     }
-  }, [user]);
+  }, [user, userProfile]);
 
   const fetchMessage = async (points: number) => {
     setMessageLoading(true);
@@ -84,6 +87,28 @@ export default function DashboardClient() {
 
     fetchRewards();
   }, []);
+  
+  const handleChangePassword = async () => {
+    if (!userProfile?.email) return;
+
+    setIsPasswordResetLoading(true);
+    const result = await sendPasswordResetEmailAction(userProfile.email);
+    setIsPasswordResetLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "Check your email",
+        description: `A password reset link has been sent to ${userProfile.email}.`,
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: result.error,
+      });
+    }
+  };
+
 
   if (loading || profileLoading) {
     return (
@@ -158,7 +183,7 @@ export default function DashboardClient() {
             <Card>
                 <CardHeader>
                 <CardTitle>Profile</CardTitle>
-                <CardDescription>This is how others will see you on the site.</CardDescription>
+                <CardDescription>Manage your account settings.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -169,7 +194,10 @@ export default function DashboardClient() {
                     <Label htmlFor="sixDigitId">Unique ID</Label>
                     <Input id="sixDigitId" type="text" value={userProfile.sixDigitId} disabled />
                 </div>
-                <Button disabled>Update Profile (Coming Soon)</Button>
+                 <Button onClick={handleChangePassword} disabled={isPasswordResetLoading}>
+                    {isPasswordResetLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Change Password
+                </Button>
                 </CardContent>
             </Card>
         </div>
