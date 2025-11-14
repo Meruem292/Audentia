@@ -9,7 +9,7 @@ import AdminDashboardClient from "@/components/admin/AdminDashboardClient";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getAdminTransactionsAction, getAdminUsersAction } from "@/lib/actions";
-import { Transaction, UserProfile } from "@/lib/types";
+import { Transaction, UserProfile, UserProfileSerializable } from "@/lib/types";
 import {
   Table,
   TableBody,
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Users } from "lucide-react";
 
 interface AdminAnalytics {
   totalUsers: number;
@@ -35,7 +34,7 @@ export default function AdminDashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
   const [transactionsError, setTransactionsError] = useState<string | null>(null);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserProfileSerializable[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [usersError, setUsersError] = useState<string | null>(null);
 
@@ -81,8 +80,7 @@ export default function AdminDashboardPage() {
       if (error) {
         setUsersError(error);
       } else if (data) {
-        // The data coming from the server action is already serialized
-        setUsers(data as UserProfile[]);
+        setUsers(data as UserProfileSerializable[]);
       }
       setUsersLoading(false);
     }
@@ -106,8 +104,8 @@ export default function AdminDashboardPage() {
   }
 
   const getPointsChange = (tx: Transaction) => {
-    if (tx.pointsEarned) return tx.pointsEarned;
-    if (tx.pointsUsed) return -tx.pointsUsed;
+    if (tx.pointsEarned && tx.pointsEarned > 0) return tx.pointsEarned;
+    if (tx.pointsUsed && tx.pointsUsed > 0) return -tx.pointsUsed;
     return 0;
   }
 
@@ -177,6 +175,7 @@ export default function AdminDashboardPage() {
                     <Table>
                     <TableHeader>
                         <TableRow>
+                        <TableHead>Date</TableHead>
                         <TableHead>User ID</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Details</TableHead>
@@ -190,6 +189,9 @@ export default function AdminDashboardPage() {
                         const pointsChange = getPointsChange(tx);
                         return (
                         <TableRow key={tx.id}>
+                            <TableCell>
+                                {new Date(tx.timestamp).toLocaleString()}
+                            </TableCell>
                             <TableCell>{tx.userId}</TableCell>
                             <TableCell>
                             <Badge variant={type.variant}>

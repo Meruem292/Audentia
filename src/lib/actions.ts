@@ -9,7 +9,6 @@ import type { Reward, Transaction, UserProfile, UserProfileSerializable } from "
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "./auth";
-import { verifyUser } from "./auth-user";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -111,7 +110,9 @@ async function seedInitialRewards() {
 
 export async function getAdminRewardsAction() {
   try {
-    await verifyAdmin();
+    const adminVerification = await verifyAdmin();
+    if(adminVerification.error) throw new Error("Unauthorized");
+
     await seedInitialRewards();
     const rewardsSnapshot = await admin.firestore().collection('rewards').orderBy('name').get();
     const rewards = rewardsSnapshot.docs.map(doc => ({...doc.data(), id: doc.id} as Reward));
@@ -131,7 +132,9 @@ const rewardUpdateSchema = z.object({
 
 export async function updateRewardAction(reward: Reward) {
   try {
-    await verifyAdmin();
+    const adminVerification = await verifyAdmin();
+    if(adminVerification.error) throw new Error("Unauthorized");
+
     const validatedReward = rewardUpdateSchema.safeParse(reward);
     if (!validatedReward.success) {
       return { error: "Invalid reward data." };
@@ -141,7 +144,7 @@ export async function updateRewardAction(reward: Reward) {
     await admin.firestore().collection('rewards').doc(id).update(rewardData);
 
     revalidatePath("/admin/rewards");
-    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/home");
     return { success: true };
   } catch (error: any) {
     if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
@@ -152,7 +155,8 @@ export async function updateRewardAction(reward: Reward) {
 
 export async function deleteRewardAction(rewardId: string) {
     try {
-        await verifyAdmin();
+        const adminVerification = await verifyAdmin();
+        if(adminVerification.error) throw new Error("Unauthorized");
         if(!rewardId) {
             return { error: "Invalid reward ID." };
         }
@@ -160,7 +164,7 @@ export async function deleteRewardAction(rewardId: string) {
         await admin.firestore().collection('rewards').doc(rewardId).delete();
 
         revalidatePath("/admin/rewards");
-        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/home");
         return { success: true };
     } catch (error: any) {
         if (error.digest?.includes('NEXT_REDIRECT')) { throw error; }
@@ -181,9 +185,11 @@ export async function getRewardsAction() {
     }
 }
 
-export async function getAdminTransactionsAction() {
+export async function getAdminTransactionsAction(): Promise<{ success: boolean; data?: Transaction[]; error?: string; }> {
     try {
-        await verifyAdmin();
+        const adminVerification = await verifyAdmin();
+        if(adminVerification.error) throw new Error("Unauthorized");
+        
         const transactionsSnapshot = await admin.firestore()
             .collection('transactions')
             .orderBy('timestamp', 'desc')
@@ -195,12 +201,13 @@ export async function getAdminTransactionsAction() {
         
         const transactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
-            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toMillis() : Date.parse(data.timestamp || new Date().toISOString());
+            // Firestore Timestamps need to be converted to a serializable format.
+            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toMillis() : Date.now();
             
             return {
                 id: doc.id,
                 ...data,
-                timestamp: new Date(timestamp),
+                timestamp: timestamp,
             } as Transaction;
         });
 
@@ -215,9 +222,12 @@ export async function getAdminTransactionsAction() {
     }
 }
 
+
 export async function getAdminUsersAction(): Promise<{ success: boolean; data?: UserProfileSerializable[]; error?: string; }> {
     try {
-        await verifyAdmin();
+        const adminVerification = await verifyAdmin();
+        if(adminVerification.error) throw new Error("Unauthorized");
+
         const usersSnapshot = await admin.firestore().collection('users').orderBy('createdAt', 'desc').get();
         const users = usersSnapshot.docs.map(doc => {
             const data = doc.data() as UserProfile;

@@ -25,7 +25,7 @@ export interface Reward {
 
 export interface Transaction {
   id: string;
-  timestamp: Date;
+  timestamp: number; // Use number for serializable date
   userId: string; // This is the six-digit ID
   status: 'valid' | 'invalid' | 'dispensed';
   
