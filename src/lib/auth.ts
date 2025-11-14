@@ -1,14 +1,23 @@
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { getAuth } from "firebase-admin/auth";
 import admin from "@/lib/firebase/admin"; 
 
-export async function verifyAdmin() {
+type VerificationResult = {
+  success: true;
+  claims: auth.DecodedIdToken;
+} | {
+  success: false;
+  redirect: string;
+  error: string;
+};
+
+
+export async function verifyAdmin(): Promise<{ error: string, redirect: string } | { error: null, claims: auth.DecodedIdToken }> {
   const sessionCookie = cookies().get("session")?.value;
 
   if (!sessionCookie) {
-    redirect("/login");
+    return { error: "No session cookie.", redirect: "/login" };
   }
 
   try {
@@ -16,13 +25,12 @@ export async function verifyAdmin() {
     const userDoc = await admin.firestore().collection("users").doc(decodedClaims.uid).get();
 
     if (!userDoc.exists || userDoc.data()?.role !== "admin") {
-      redirect("/dashboard"); // Redirect non-admins or if doc doesn't exist
+      return { error: "User is not an admin.", redirect: "/dashboard" };
     }
     
-    return decodedClaims;
+    return { error: null, claims: decodedClaims };
   } catch (error) {
-    // Session cookie is invalid or expired.
     console.error("Session verification failed:", error);
-    redirect("/login");
+    return { error: "Session verification failed.", redirect: "/login" };
   }
 }

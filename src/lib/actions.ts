@@ -5,7 +5,7 @@ import * as z from "zod";
 import admin from "@/lib/firebase/admin";
 import { Timestamp } from 'firebase-admin/firestore';
 import { generateMotivationalMessage } from "@/ai/flows/generate-motivational-message";
-import type { Reward, Transaction, UserProfile } from "./types";
+import type { Reward, Transaction, UserProfile, UserProfileSerializable } from "./types";
 import { auth } from "firebase-admin";
 import { revalidatePath } from "next/cache";
 import { verifyAdmin } from "./auth";
@@ -195,12 +195,12 @@ export async function getAdminTransactionsAction() {
         
         const transactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
-            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toDate() : new Date(data.timestamp || 0);
+            const timestamp = data.timestamp instanceof Timestamp ? data.timestamp.toMillis() : Date.parse(data.timestamp || new Date().toISOString());
             
             return {
                 id: doc.id,
                 ...data,
-                timestamp: timestamp,
+                timestamp: new Date(timestamp),
             } as Transaction;
         });
 
@@ -215,11 +215,18 @@ export async function getAdminTransactionsAction() {
     }
 }
 
-export async function getAdminUsersAction() {
+export async function getAdminUsersAction(): Promise<{ success: boolean; data?: UserProfileSerializable[]; error?: string; }> {
     try {
         await verifyAdmin();
         const usersSnapshot = await admin.firestore().collection('users').orderBy('createdAt', 'desc').get();
-        const users = usersSnapshot.docs.map(doc => doc.data() as UserProfile);
+        const users = usersSnapshot.docs.map(doc => {
+            const data = doc.data() as UserProfile;
+            // Serialize the timestamp to a number (milliseconds)
+            return {
+                ...data,
+                createdAt: data.createdAt.toMillis(),
+            };
+        });
         return { success: true, data: users };
     } catch (error: any) {
         if (error.digest?.includes('NEXT_REDIRECT')) {

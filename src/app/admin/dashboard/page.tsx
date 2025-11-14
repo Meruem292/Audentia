@@ -81,6 +81,7 @@ export default function AdminDashboardPage() {
       if (error) {
         setUsersError(error);
       } else if (data) {
+        // The data coming from the server action is already serialized
         setUsers(data as UserProfile[]);
       }
       setUsersLoading(false);
@@ -147,7 +148,7 @@ export default function AdminDashboardPage() {
                             <TableCell className="font-medium">{userItem.email}</TableCell>
                             <TableCell>{userItem.sixDigitId}</TableCell>
                             <TableCell>
-                                {new Date(userItem.createdAt.seconds * 1000).toLocaleDateString()}
+                                {new Date(userItem.createdAt).toLocaleDateString()}
                             </TableCell>
                             <TableCell className="text-right font-medium text-primary">
                                 {userItem.points.toLocaleString()}

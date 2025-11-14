@@ -6,9 +6,16 @@ export interface UserProfile {
   email: string;
   points: number;
   sixDigitId: string;
-  createdAt: Timestamp;
+  createdAt: Timestamp; // This is the Firestore Timestamp object
   role: 'user' | 'admin';
 }
+
+// A version of UserProfile where the Timestamp is a number (milliseconds)
+// This is safe to pass from Server to Client Components.
+export interface UserProfileSerializable extends Omit<UserProfile, 'createdAt'> {
+  createdAt: number;
+}
+
 
 export interface Reward {
     id: string;
