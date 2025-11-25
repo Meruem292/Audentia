@@ -8,6 +8,7 @@ import { OverviewChart } from "@/components/admin/overview-chart";
 import { useCollection, useFirestore } from "@/lib/firebase";
 import { collection, query } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BottleHistoryTable } from "@/components/admin/bottle-history-table";
 
 export default function AdminOverviewPage() {
   const firestore = useFirestore();
@@ -70,6 +71,7 @@ export default function AdminOverviewPage() {
         </Card>
       </div>
       <OverviewChart />
+      <BottleHistoryTable />
     </div>
   );
 }
