@@ -40,7 +40,6 @@ export function SignupForm() {
     }
 
     const formData = new FormData(event.currentTarget);
-    const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     
@@ -53,7 +52,7 @@ export function SignupForm() {
       await setDoc(doc(firestore, "users", user.uid), {
         uid: user.uid,
         email: user.email,
-        name: name,
+        name: user.email, // Use email as default name
         role: 'user', // Default role
         points: 0,
         createdAt: serverTimestamp(),
@@ -84,10 +83,6 @@ export function SignupForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSignUp} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input id="name" name="name" type="text" placeholder="John Doe" required />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" type="email" placeholder="you@example.com" required />
