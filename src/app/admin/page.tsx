@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BottleHistoryTable } from "@/components/admin/bottle-history-table";
 import { DispenseHistoryTable } from "@/components/admin/dispense-history-table";
 import { PopularRewardsChart } from "@/components/admin/popular-rewards-chart";
+import { TransactionStatusChart } from "@/components/admin/transaction-status-chart";
 
 export default function AdminOverviewPage() {
   const firestore = useFirestore();
@@ -103,9 +104,10 @@ export default function AdminOverviewPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <OverviewChart />
         <PopularRewardsChart />
+        <TransactionStatusChart />
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <BottleHistoryTable />
