@@ -3,7 +3,7 @@
 
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Users, Archive, Recycle } from "lucide-react";
+import { Star, Users, Archive, Recycle } from "lucide-react";
 import { OverviewChart } from "@/components/admin/overview-chart";
 import { useCollection, useFirestore } from "@/lib/firebase";
 import { collection, query } from "firebase/firestore";
@@ -41,6 +41,11 @@ export default function AdminOverviewPage() {
     if (!bottleHistory) return 0;
     return bottleHistory.reduce((total, item) => total + (item.plasticBottleCount || 0), 0);
   }, [bottleHistory]);
+  
+  const totalPointsRedeemed = useMemo(() => {
+    if (!dispenseHistory) return 0;
+    return dispenseHistory.reduce((total, item) => total + (item.pointsUsed || 0), 0);
+  }, [dispenseHistory]);
 
   return (
     <div className="space-y-6">
@@ -63,17 +68,23 @@ export default function AdminOverviewPage() {
         </Card>
         <Card className="bg-[#E8F5E9] border-[#C8E6C9]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Machines</CardTitle>
-            <Bot className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total Points Redeemed</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">57</div>
-            <p className="text-xs text-muted-foreground">4 offline</p>
+            {loading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{totalPointsRedeemed.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">Across all users</p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card className="bg-[#FFFDE7] border-[#FFF9C4]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rewards Redeemed</CardTitle>
+            <CardTitle className="text-sm font-medium">Rewards Dispensed</CardTitle>
             <Archive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
