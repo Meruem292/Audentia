@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -91,6 +92,8 @@ const SidebarProvider = React.forwardRef<
 
     // Helper to toggle the sidebar.
     const toggleSidebar = React.useCallback(() => {
+      // On mobile, we don't use the bottom bar, so we toggle the sheet.
+      // This part of the logic might need adjustment if a bottom bar is introduced.
       return isMobile
         ? setOpenMobile((open) => !open)
         : setOpen((open) => !open)
@@ -168,15 +171,20 @@ const Sidebar = React.forwardRef<
     {
       side = "left",
       variant = "sidebar",
-      collapsible = "offcanvas",
+      collapsible = "icon", // Changed default to 'icon' for desktop
       className,
       children,
       ...props
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state } = useSidebar()
 
+    if (isMobile) {
+      // On mobile, we render nothing here, as the bottom bar will be handled separately.
+      return null;
+    }
+    
     if (collapsible === "none") {
       return (
         <div
@@ -189,26 +197,6 @@ const Sidebar = React.forwardRef<
         >
           {children}
         </div>
-      )
-    }
-
-    if (isMobile) {
-      return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
-        </Sheet>
       )
     }
 
@@ -263,7 +251,11 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, isMobile } = useSidebar()
+
+  if (isMobile) {
+    return null; // Don't render the trigger on mobile
+  }
 
   return (
     <Button

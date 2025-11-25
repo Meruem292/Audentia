@@ -13,6 +13,8 @@ import { useUser } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BottomNav } from "@/components/shared/bottom-nav";
 
 export default function DashboardLayout({
   children,
@@ -21,6 +23,7 @@ export default function DashboardLayout({
 }) {
   const { user, loading } = useUser();
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,13 +55,18 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <DashboardNav navItems={userNavItems} />
-      </Sidebar>
-      <SidebarInset>
-        <Header title="User Dashboard" />
-        <main className="p-4 sm:p-6 lg:p-8 animate-fade-in">{children}</main>
-      </SidebarInset>
+      <div className="flex flex-col min-h-screen">
+        <Sidebar>
+          <DashboardNav navItems={userNavItems} />
+        </Sidebar>
+        <SidebarInset>
+          <Header title="User Dashboard" />
+          <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in pb-20 md:pb-8">
+            {children}
+          </main>
+        </SidebarInset>
+        {isMobile && <BottomNav navItems={userNavItems} />}
+      </div>
     </SidebarProvider>
   );
 }
