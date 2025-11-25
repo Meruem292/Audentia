@@ -13,8 +13,8 @@ interface BottleHistory extends DocumentData {
 }
 
 const COLORS = {
-  valid: 'hsl(var(--primary))',
-  invalid: 'hsl(var(--destructive))',
+  valid: 'hsl(var(--chart-1))',
+  invalid: 'hsl(var(--chart-4))',
 };
 
 export function TransactionStatusChart() {

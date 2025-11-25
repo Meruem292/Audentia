@@ -104,7 +104,7 @@ export function OverviewChart() {
                                 }}
                                  formatter={(value: number) => [value.toLocaleString(), 'Total Points']}
                             />
-                            <Bar dataKey="totalPoints" fill="hsl(var(--primary))" name="Total Points Redeemed" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="totalPoints" fill="hsl(var(--chart-1))" name="Total Points Redeemed" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                  ) : (

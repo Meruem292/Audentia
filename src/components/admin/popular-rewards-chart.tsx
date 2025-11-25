@@ -95,7 +95,7 @@ export function PopularRewardsChart() {
                   borderRadius: 'var(--radius)',
                 }}
               />
-              <Bar dataKey="count" fill="hsl(var(--primary))" name="Times Dispensed" radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill="hsl(var(--chart-2))" name="Times Dispensed" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
