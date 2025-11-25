@@ -1,11 +1,21 @@
 
+'use client';
 import { Button } from "@/components/ui/button";
 import { Recycle, Star, Gift, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
+import { useUser } from "@/lib/firebase";
 
 export default function Home() {
+  const { userProfile, loading } = useUser();
+  
+  const getDashboardLink = () => {
+    if (loading) return "/login";
+    if (!userProfile) return "/login";
+    return userProfile.role === 'admin' ? '/admin' : '/dashboard';
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -16,14 +26,25 @@ export default function Home() {
             </Link>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
-            <Button variant="ghost" asChild>
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/signup">
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            {!loading && !userProfile && (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">
+                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </>
+            )}
+             {!loading && userProfile && (
+                <Button asChild>
+                  <Link href={getDashboardLink()}>
+                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+             )}
           </div>
         </div>
       </header>
