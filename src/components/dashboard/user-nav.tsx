@@ -31,9 +31,6 @@ export function UserNav() {
   };
 
   const getInitials = () => {
-    if (userProfile?.name) {
-      return userProfile.name.charAt(0).toUpperCase();
-    }
     if (userProfile?.email) {
       return userProfile.email.charAt(0).toUpperCase();
     }
@@ -66,12 +63,6 @@ export function UserNav() {
             <Link href="/dashboard/profile">
               <UserIcon className="mr-2 h-4 w-4" />
               <span>Profile</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard/rewards">
-              <Gift className="mr-2 h-4 w-4" />
-              <span>Rewards</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem disabled>
