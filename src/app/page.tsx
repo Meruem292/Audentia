@@ -20,7 +20,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-white relative">
       {/* Background Image */}
       <Image
-        src="https://picsum.photos/seed/planet/1920/1080"
+        src="https://picsum.photos/seed/green-world/1920/1080"
         alt="Lush green landscape"
         fill
         className="object-cover z-[-1]"
