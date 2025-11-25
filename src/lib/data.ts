@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Gift, User, Bot, Users, Archive, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, Gift, User, Users, Archive, type LucideIcon } from "lucide-react";
 
 export interface NavItem {
     href: string;
@@ -30,11 +30,6 @@ export const adminNavItems: NavItem[] = [
     href: "/admin",
     label: "Overview",
     icon: LayoutDashboard,
-  },
-  {
-    href: "/admin/machines",
-    label: "Machines",
-    icon: Bot,
   },
   {
     href: "/admin/users",
