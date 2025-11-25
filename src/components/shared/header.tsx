@@ -6,8 +6,8 @@ import { useUser } from "@/lib/firebase";
 export function Header({ children }: { children?: React.ReactNode }) {
   const { user } = useUser();
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+    <header className="sticky top-0 z-40 border-b bg-background container mx-auto">
+      <div className="flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-2 items-center">
             {children}
         </div>
