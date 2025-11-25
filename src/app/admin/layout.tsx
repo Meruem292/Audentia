@@ -58,7 +58,7 @@ export default function AdminLayout({
       </Sidebar>
       <SidebarInset>
         <Header title="Admin" />
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="p-4 sm:p-6 lg:p-8 animate-fade-in">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -51,7 +51,7 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="container grid lg:grid-cols-2 gap-12 items-center py-20 md:py-32">
+        <section className="container grid lg:grid-cols-2 gap-12 items-center py-20 md:py-32 animate-fade-in">
           <div className="grid gap-6">
             <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-5xl lg:text-6xl">
               Turn Your Plastic Bottles into Points
@@ -83,7 +83,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="bg-card py-20 md:py-32">
+        <section id="features" className="bg-card py-20 md:py-32 animate-fade-in [animation-delay:200ms]">
           <div className="container">
             <div className="grid gap-4 text-center">
               <h2 className="font-headline text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -126,7 +126,7 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="container py-20 md:py-32">
+        <section className="container py-20 md:py-32 animate-fade-in [animation-delay:400ms]">
           <div className="grid items-center justify-center gap-4 text-center">
             <h2 className="font-headline text-3xl font-bold tracking-tighter md:text-4xl">
               Ready to Make a Difference?
