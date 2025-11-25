@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
     Table,
     TableBody,
@@ -16,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useCollection, useFirestore } from "@/lib/firebase";
 import { collection, query, DocumentData } from "firebase/firestore";
 import { Skeleton } from "../ui/skeleton";
+import { EditRewardDialog } from './edit-reward-dialog';
 
 interface Reward extends DocumentData {
   id: string;
@@ -28,6 +30,14 @@ export function RewardManagement() {
     const firestore = useFirestore();
     const rewardsQuery = firestore ? query(collection(firestore, "rewards")) : null;
     const { data: rewards, loading, error } = useCollection<Reward>(rewardsQuery);
+    
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+
+    const handleEditClick = (reward: Reward) => {
+        setSelectedReward(reward);
+        setIsEditDialogOpen(true);
+    };
 
     if (loading) {
         return (
@@ -37,7 +47,6 @@ export function RewardManagement() {
                         <TableRow>
                             <TableHead>Reward</TableHead>
                             <TableHead>Points Cost</TableHead>
-                            <TableHead>Stock</TableHead>
                             <TableHead><span className="sr-only">Actions</span></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -50,7 +59,6 @@ export function RewardManagement() {
                                         <Skeleton className="h-4 w-32" />
                                     </div>
                                 </TableCell>
-                                <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                                 <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                                 <TableCell className="text-right">
                                     <Skeleton className="h-8 w-8" />
@@ -78,7 +86,6 @@ export function RewardManagement() {
                     <TableRow>
                         <TableHead>Reward</TableHead>
                         <TableHead>Points Cost</TableHead>
-                        <TableHead>Stock</TableHead>
                         <TableHead><span className="sr-only">Actions</span></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -98,7 +105,6 @@ export function RewardManagement() {
                                 </div>
                             </TableCell>
                             <TableCell>{reward.points.toLocaleString()}</TableCell>
-                            <TableCell>{/* Stock info not in provided data, leaving empty */}</TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -107,7 +113,9 @@ export function RewardManagement() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleEditClick(reward)}>
+                                            Edit
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
@@ -115,6 +123,13 @@ export function RewardManagement() {
                     ))}
                 </TableBody>
             </Table>
+            {selectedReward && (
+                 <EditRewardDialog
+                    isOpen={isEditDialogOpen}
+                    onOpenChange={setIsEditDialogOpen}
+                    reward={selectedReward}
+                 />
+            )}
         </div>
     );
 }
