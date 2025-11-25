@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Users, Archive, Recycle } from "lucide-react";
 import { OverviewChart } from "@/components/admin/overview-chart";
@@ -10,7 +11,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminOverviewPage() {
   const firestore = useFirestore();
-  const usersQuery = firestore ? query(collection(firestore, "users")) : null;
+  
+  const usersQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "users"));
+  }, [firestore]);
+
   const { data: users, loading } = useCollection(usersQuery);
 
   return (
