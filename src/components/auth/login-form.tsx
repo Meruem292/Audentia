@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from 'next/navigation';
 import { useAuth, useFirestore } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function LoginForm() {
   const router = useRouter();
@@ -25,6 +25,7 @@ export function LoginForm() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<'user' | 'admin'>('user');
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -75,35 +76,40 @@ export function LoginForm() {
   };
 
   return (
-    <Tabs defaultValue="user" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="user">User / Admin</TabsTrigger>
-      </TabsList>
-      <TabsContent value="user">
-        <Card>
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
-              Access your EcoVend Hub account to track your points and rewards.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignIn} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" placeholder="you@example.com" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" required />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign In</CardTitle>
+        <CardDescription>
+          Access your EcoVend Hub account to track your points and rewards.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSignIn} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="role">Sign in as</Label>
+            <Select value={role} onValueChange={(value) => setRole(value as 'user' | 'admin')}>
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" name="password" type="password" required />
+          </div>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
