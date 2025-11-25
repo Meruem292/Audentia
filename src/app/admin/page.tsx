@@ -19,7 +19,15 @@ export default function AdminOverviewPage() {
     return query(collection(firestore, "users"));
   }, [firestore]);
 
-  const { data: users, loading } = useCollection(usersQuery);
+  const dispenseHistoryQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "dispense_history"));
+  }, [firestore]);
+
+  const { data: users, loading: usersLoading } = useCollection(usersQuery);
+  const { data: dispenseHistory, loading: dispenseHistoryLoading } = useCollection(dispenseHistoryQuery);
+
+  const loading = usersLoading || dispenseHistoryLoading;
 
   return (
     <div className="space-y-6">
@@ -56,8 +64,14 @@ export default function AdminOverviewPage() {
             <Archive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3,456</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+             {loading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{dispenseHistory?.length || 0}</div>
+                <p className="text-xs text-muted-foreground">Total rewards dispensed</p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
