@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
     DropdownMenu,
@@ -98,8 +98,7 @@ export function UserList() {
                         <TableCell>
                             <div className="flex items-center gap-4">
                                 <Avatar>
-                                    <AvatarImage src={`https://picsum.photos/seed/${user.uid}/40/40`} data-ai-hint="person face" />
-                                    <AvatarFallback>{user.name ? user.name.charAt(0) : <User />}</AvatarFallback>
+                                    <AvatarFallback>{user.email ? user.email.charAt(0).toUpperCase() : <User />}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <div className="font-medium">{user.name}</div>
