@@ -50,6 +50,9 @@ export function TransactionStatusChart() {
     ];
   }, [bottleHistory]);
 
+  const totalValue = useMemo(() => chartData.reduce((sum, entry) => sum + entry.value, 0), [chartData]);
+
+
   return (
     <Card>
       <CardHeader>
@@ -59,7 +62,7 @@ export function TransactionStatusChart() {
       <CardContent>
         {loading ? (
           <Skeleton className="w-full h-[350px]" />
-        ) : chartData.length > 0 ? (
+        ) : totalValue > 0 ? (
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
@@ -70,7 +73,8 @@ export function TransactionStatusChart() {
                 outerRadius={100}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => (percent > 0 ? `${(percent * 100).toFixed(0)}%` : '')}
+                
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[entry.name.toLowerCase() as keyof typeof COLORS]} />
