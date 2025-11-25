@@ -76,7 +76,7 @@ function BottleHistoryRow({ item, user }: { item: BottleHistory, user: UserProfi
                        <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="icon">
                                 <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
-                                <span className="sr-only">{isOpen ? "Collapse" :_("Expand")}</span>
+                                <span className="sr-only">{isOpen ? "Collapse" : "Expand"}</span>
                             </Button>
                         </CollapsibleTrigger>
                     </TableCell>
