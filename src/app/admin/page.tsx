@@ -45,7 +45,7 @@ export default function AdminOverviewPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-[#E0F7FA] border-[#B2EBF2]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -61,7 +61,7 @@ export default function AdminOverviewPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#E8F5E9] border-[#C8E6C9]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Machines</CardTitle>
             <Bot className="h-4 w-4 text-muted-foreground" />
@@ -71,7 +71,7 @@ export default function AdminOverviewPage() {
             <p className="text-xs text-muted-foreground">4 offline</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#FFFDE7] border-[#FFF9C4]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rewards Redeemed</CardTitle>
             <Archive className="h-4 w-4 text-muted-foreground" />
@@ -87,7 +87,7 @@ export default function AdminOverviewPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#FCE4EC] border-[#F8BBD0]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Bottles Recycled</CardTitle>
             <Recycle className="h-4 w-4 text-muted-foreground" />
