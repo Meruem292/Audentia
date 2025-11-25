@@ -1,9 +1,18 @@
 
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bot, Users, Archive, Recycle } from "lucide-react";
 import { OverviewChart } from "@/components/admin/overview-chart";
+import { useCollection, useFirestore } from "@/lib/firebase";
+import { collection, query } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminOverviewPage() {
+  const firestore = useFirestore();
+  const usersQuery = firestore ? query(collection(firestore, "users")) : null;
+  const { data: users, loading } = useCollection(usersQuery);
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -13,8 +22,14 @@ export default function AdminOverviewPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+52 this month</p>
+            {loading ? (
+              <Skeleton className="h-8 w-20" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{users?.length || 0}</div>
+                <p className="text-xs text-muted-foreground">All registered users</p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
