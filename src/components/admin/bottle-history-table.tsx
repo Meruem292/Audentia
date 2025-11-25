@@ -77,7 +77,6 @@ export function BottleHistoryTable() {
               <TableHead>Bottles</TableHead>
               <TableHead>Points</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -96,7 +95,6 @@ export function BottleHistoryTable() {
                   <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                 </TableRow>
               ))
             ) : history && history.length > 0 ? (
@@ -111,7 +109,7 @@ export function BottleHistoryTable() {
                         </Avatar>
                         <div>
                             <div className="font-medium">{user?.name || user?.email || 'Unknown User'}</div>
-                            {user?.name && (
+                            {user?.name && user?.email && (
                                 <div className="text-sm text-muted-foreground">{user.email}</div>
                             )}
                         </div>
@@ -124,15 +122,12 @@ export function BottleHistoryTable() {
                         {item.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {item.timestamp.toDate().toLocaleString()}
-                    </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   No bottle insertion history found.
                 </TableCell>
               </TableRow>

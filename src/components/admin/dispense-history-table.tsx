@@ -77,7 +77,6 @@ export function DispenseHistoryTable() {
               <TableHead>Points Used</TableHead>
               <TableHead>Dispenser</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -96,7 +95,6 @@ export function DispenseHistoryTable() {
                   <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                   <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                 </TableRow>
               ))
             ) : history && history.length > 0 ? (
@@ -124,15 +122,12 @@ export function DispenseHistoryTable() {
                         {item.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {item.timestamp.toDate().toLocaleString()}
-                    </TableCell>
                   </TableRow>
                 );
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   No dispense history found.
                 </TableCell>
               </TableRow>
