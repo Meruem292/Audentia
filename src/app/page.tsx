@@ -2,7 +2,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LogIn } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/shared/logo";
 import { useUser } from "@/lib/firebase";
@@ -17,21 +16,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-white relative">
-      {/* Background Image */}
-      <Image
-        src="https://picsum.photos/seed/green-world/1920/1080"
-        alt="Lush green landscape"
-        fill
-        className="object-cover z-[-1]"
-        data-ai-hint="recycling environment"
-        priority
-      />
-      <div className="absolute inset-0 bg-black/40 z-[-1]" />
-
-
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-transparent">
+      <header className="sticky top-0 z-50 w-full">
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -68,13 +55,13 @@ export default function Home() {
       <main className="flex-1 flex flex-col justify-center animate-fade-in">
         <section className="container text-center">
           <div className="flex flex-col items-center gap-6">
-             <div className="p-4 bg-background/20 backdrop-blur-sm rounded-full mb-4">
+             <div className="mb-4">
                 <Logo />
             </div>
             <h1 className="text-4xl font-bold tracking-tighter md:text-5xl lg:text-6xl">
               Welcome to EcoVend Hub
             </h1>
-            <p className="max-w-[700px] text-lg text-white/80 md:text-xl">
+            <p className="max-w-[700px] text-lg text-muted-foreground md:text-xl">
               The smart, simple, and stylish way to turn your plastic bottles into rewards. Join us in making our planet greener, one bottle at a time!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-4">
@@ -94,9 +81,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full bg-transparent">
+      <footer className="w-full">
         <div className="container flex items-center justify-center h-20">
-          <p className="text-sm text-white/70">
+          <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} EcoVend Hub. All rights reserved.
           </p>
         </div>
