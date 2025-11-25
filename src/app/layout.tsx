@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/lib/firebase';
 
 export const metadata: Metadata = {
-  title: 'EcoVend Hub',
+  title: 'EcoVend',
   description: 'Turn your plastic bottles into rewards.',
 };
 

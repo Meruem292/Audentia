@@ -104,7 +104,7 @@ export function LoginForm() {
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
         <CardDescription>
-          Access your EcoVend Hub account to track your points and rewards.
+          Access your EcoVend account to track your points and rewards.
         </CardDescription>
       </CardHeader>
       <CardContent>

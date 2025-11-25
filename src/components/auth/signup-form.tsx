@@ -78,7 +78,7 @@ export function SignupForm() {
       <CardHeader>
         <CardTitle>Create an Account</CardTitle>
         <CardDescription>
-          Join EcoVend Hub and start earning rewards for recycling today!
+          Join EcoVend and start earning rewards for recycling today!
         </CardDescription>
       </CardHeader>
       <CardContent>

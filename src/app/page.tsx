@@ -59,7 +59,7 @@ export default function Home() {
                 <Logo />
             </div>
             <h1 className="text-4xl font-bold tracking-tighter md:text-5xl lg:text-6xl">
-              Welcome to EcoVend Hub
+              Welcome to EcoVend
             </h1>
             <p className="max-w-[700px] text-lg text-muted-foreground md:text-xl">
               The smart, simple, and stylish way to turn your plastic bottles into rewards. Join us in making our planet greener, one bottle at a time!
@@ -84,7 +84,7 @@ export default function Home() {
       <footer className="w-full">
         <div className="container flex items-center justify-center h-20">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} EcoVend Hub. All rights reserved.
+            © {new Date().getFullYear()} EcoVend. All rights reserved.
           </p>
         </div>
       </footer>
