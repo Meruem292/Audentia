@@ -14,6 +14,11 @@ export const userNavItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
+    href: "/rewards",
+    label: "Rewards",
+    icon: Gift,
+  },
+  {
     href: "/dashboard/profile",
     label: "Profile",
     icon: User,

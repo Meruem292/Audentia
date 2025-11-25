@@ -89,7 +89,7 @@ export default function DashboardLayout({
         </Sidebar>
         <div className="flex-1 flex flex-col">
           <Header>
-             <h1 className="text-xl font-bold tracking-tight ml-4">User Dashboard</h1>
+             <h1 className="text-xl font-bold tracking-tight ml-4">Dashboard</h1>
           </Header>
           <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
             {children}
