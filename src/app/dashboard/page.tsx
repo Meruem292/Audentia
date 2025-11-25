@@ -120,7 +120,7 @@ export default function DashboardPage() {
   return (
     <div className="grid gap-6">
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="bg-[#E8F5E9] border-[#C8E6C9]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Points</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
@@ -142,7 +142,7 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-[#FCE4EC] border-[#F8BBD0]">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Bottles Recycled
