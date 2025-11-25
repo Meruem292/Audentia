@@ -11,7 +11,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCollection, useFirestore } from "@/lib/firebase";
@@ -54,10 +53,7 @@ export function RewardManagement() {
                         {[...Array(4)].map((_, i) => (
                             <TableRow key={i}>
                                 <TableCell>
-                                    <div className="flex items-center gap-4">
-                                        <Skeleton className="h-16 w-16 rounded-md" />
-                                        <Skeleton className="h-4 w-32" />
-                                    </div>
+                                    <Skeleton className="h-4 w-32" />
                                 </TableCell>
                                 <TableCell><Skeleton className="h-4 w-12" /></TableCell>
                                 <TableCell className="text-right">
@@ -93,16 +89,7 @@ export function RewardManagement() {
                     {rewards.map((reward) => (
                         <TableRow key={reward.id}>
                             <TableCell>
-                                <div className="flex items-center gap-4">
-                                    <Image
-                                        src={reward.imageUrl}
-                                        alt={reward.name}
-                                        width={64}
-                                        height={64}
-                                        className="rounded-md object-cover"
-                                    />
-                                    <span className="font-medium">{reward.name}</span>
-                                </div>
+                                <span className="font-medium">{reward.name}</span>
                             </TableCell>
                             <TableCell>{reward.points.toLocaleString()}</TableCell>
                             <TableCell className="text-right">
