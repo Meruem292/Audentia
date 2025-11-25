@@ -17,21 +17,21 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-white">
+    <div className="flex flex-col min-h-screen bg-background text-white relative">
       {/* Background Image */}
       <Image
         src="https://picsum.photos/seed/planet/1920/1080"
         alt="Lush green landscape"
         fill
-        className="object-cover z-[-1] opacity-30"
+        className="object-cover z-[-1]"
         data-ai-hint="recycling environment"
         priority
       />
-      <div className="absolute inset-0 bg-black/50 z-[-1]" />
+      <div className="absolute inset-0 bg-black/60 z-[-1]" />
 
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 w-full bg-transparent">
         <div className="container flex h-16 items-center">
           <div className="mr-4 flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -68,7 +68,7 @@ export default function Home() {
       <main className="flex-1 flex flex-col justify-center animate-fade-in">
         <section className="container text-center">
           <div className="flex flex-col items-center gap-6">
-             <div className="p-4 bg-background/50 rounded-full mb-4">
+             <div className="p-4 bg-background/20 backdrop-blur-sm rounded-full mb-4">
                 <Logo />
             </div>
             <h1 className="text-4xl font-bold tracking-tighter md:text-5xl lg:text-6xl">
@@ -94,7 +94,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full bg-background/80 backdrop-blur-sm">
+      <footer className="w-full bg-transparent">
         <div className="container flex items-center justify-center h-20">
           <p className="text-sm text-white/70">
             © {new Date().getFullYear()} EcoVend Hub. All rights reserved.
