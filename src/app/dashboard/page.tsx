@@ -119,7 +119,7 @@ export default function DashboardPage() {
 
   return (
     <div className="grid gap-6">
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Points</CardTitle>
@@ -161,22 +161,6 @@ export default function DashboardPage() {
                 </>
             )}
           </CardContent>
-        </Card>
-         <Card className="flex flex-col">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                    <Gift className="h-5 w-5" />
-                    <span>Redeem Your Points</span>
-                </CardTitle>
-                <CardDescription>
-                    Browse the catalog and exchange your points for amazing rewards.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex items-end">
-                <Button asChild className="w-full">
-                    <Link href="/rewards">Browse Rewards</Link>
-                </Button>
-            </CardContent>
         </Card>
       </div>
 
