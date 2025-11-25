@@ -1,13 +1,25 @@
 
+'use client';
+
+import { useMemo } from 'react';
+import { useUser, useFirestore, useCollection } from '@/lib/firebase';
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  DocumentData,
+} from 'firebase/firestore';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Star, Recycle, PlusCircle } from "lucide-react";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Star, Recycle, PlusCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -15,18 +27,95 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const transactions = [
-  { id: "TXN001", date: "2023-10-26", type: "Deposit", bottles: 5, points: 50 },
-  { id: "TXN002", date: "2023-10-25", type: "Redemption", bottles: 0, points: -1000 },
-  { id: "TXN003", date: "2023-10-24", type: "Deposit", bottles: 12, points: 120 },
-  { id: "TXN004", date: "2023-10-22", type: "Deposit", bottles: 8, points: 80 },
-  { id: "TXN005", date: "2023-10-21", type: "Deposit", bottles: 3, points: 30 },
-];
+interface BottleTransaction extends DocumentData {
+  id: string;
+  timestamp: Timestamp;
+  type: 'Deposit';
+  plasticBottleCount: number;
+  pointsEarned: number;
+}
+
+interface DispenseTransaction extends DocumentData {
+  id: string;
+  timestamp: Timestamp;
+  type: 'Redemption';
+  pointsUsed: number;
+}
+
+type CombinedTransaction = (BottleTransaction | DispenseTransaction) & { sortDate: Date };
+
 
 export default function DashboardPage() {
+  const { userProfile, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+
+  const userId = userProfile?.sixDigitId;
+
+  const bottleHistoryQuery = useMemo(() => {
+    if (!firestore || !userId) return null;
+    return query(
+      collection(firestore, 'bottle_history'),
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc')
+    );
+  }, [firestore, userId]);
+
+  const dispenseHistoryQuery = useMemo(() => {
+    if (!firestore || !userId) return null;
+    return query(
+      collection(firestore, 'dispense_history'),
+      where('userId', '==', userId),
+      orderBy('timestamp', 'desc')
+    );
+  }, [firestore, userId]);
+
+  const { data: bottleHistory, loading: bottleHistoryLoading } = useCollection(bottleHistoryQuery);
+  const { data: dispenseHistory, loading: dispenseHistoryLoading } = useCollection(dispenseHistoryQuery);
+
+  const loading = userLoading || bottleHistoryLoading || dispenseHistoryLoading;
+
+  const totalBottlesRecycled = useMemo(() => {
+    if (!bottleHistory) return 0;
+    return bottleHistory.reduce((sum, item) => sum + (item.plasticBottleCount || 0), 0);
+  }, [bottleHistory]);
+
+  const recentTransactions = useMemo(() => {
+    const combined: CombinedTransaction[] = [];
+
+    if (bottleHistory) {
+      bottleHistory.forEach(item =>
+        combined.push({
+          ...item,
+          type: 'Deposit',
+          sortDate: item.timestamp.toDate(),
+        })
+      );
+    }
+    if (dispenseHistory) {
+      dispenseHistory.forEach(item =>
+        combined.push({
+          ...item,
+          type: 'Redemption',
+          sortDate: item.timestamp.toDate(),
+        })
+      );
+    }
+    
+    return combined.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime()).slice(0, 10);
+  }, [bottleHistory, dispenseHistory]);
+
+  const lastDepositPoints = useMemo(() => {
+      if (bottleHistory && bottleHistory.length > 0) {
+          const lastDeposit = bottleHistory[0]; // Already sorted by desc timestamp
+          return lastDeposit.pointsEarned;
+      }
+      return 0;
+  }, [bottleHistory]);
+
   return (
     <div className="grid gap-6">
       <div className="grid md:grid-cols-2 gap-6">
@@ -36,22 +125,40 @@ export default function DashboardPage() {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,250</div>
-            <p className="text-xs text-muted-foreground">
-              +120 points from your last deposit
-            </p>
+            {loading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">
+                  {userProfile?.points?.toLocaleString() || 0}
+                </div>
+                 {lastDepositPoints > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                        +{lastDepositPoints} points from your last deposit
+                    </p>
+                 )}
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Bottles Recycled</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Bottles Recycled
+            </CardTitle>
             <Recycle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">128</div>
-            <p className="text-xs text-muted-foreground">
-              Keep up the great work!
-            </p>
+            {loading ? (
+                <Skeleton className="h-8 w-16" />
+            ) : (
+                <>
+                    <div className="text-2xl font-bold">{totalBottlesRecycled}</div>
+                    <p className="text-xs text-muted-foreground">
+                    Keep up the great work!
+                    </p>
+                </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -75,7 +182,6 @@ export default function DashboardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Transaction ID</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Bottles</TableHead>
@@ -83,21 +189,51 @@ export default function DashboardPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((txn) => (
-                <TableRow key={txn.id}>
-                  <TableCell className="font-medium">{txn.id}</TableCell>
-                  <TableCell>{txn.date}</TableCell>
-                  <TableCell>
-                    <Badge variant={txn.type === "Deposit" ? "default" : "destructive"}>
-                      {txn.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{txn.bottles > 0 ? txn.bottles : "-"}</TableCell>
-                  <TableCell className={`text-right font-medium ${txn.points > 0 ? 'text-primary' : 'text-destructive'}`}>
-                    {txn.points > 0 ? `+${txn.points}` : txn.points}
-                  </TableCell>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                    </TableRow>
+                ))
+              ) : recentTransactions.length > 0 ? (
+                recentTransactions.map((txn) => (
+                  <TableRow key={txn.id}>
+                    <TableCell>{txn.sortDate.toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          txn.type === 'Deposit' ? 'default' : 'destructive'
+                        }
+                      >
+                        {txn.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {(txn as BottleTransaction).plasticBottleCount || '-'}
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-medium ${
+                        txn.type === 'Deposit'
+                          ? 'text-primary'
+                          : 'text-destructive'
+                      }`}
+                    >
+                      {txn.type === 'Deposit'
+                        ? `+${(txn as BottleTransaction).pointsEarned}`
+                        : `-${(txn as DispenseTransaction).pointsUsed}`}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                        No transactions found.
+                    </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>
