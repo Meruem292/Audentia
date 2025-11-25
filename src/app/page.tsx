@@ -56,11 +56,10 @@ export default function Home() {
       <main className="flex-1">
         <section className="relative h-[calc(100vh-4rem)] flex items-center justify-center text-center text-white">
             <Image
-                src="https://images.unsplash.com/photo-1599056262495-a53d9971a8f3?q=80&w=2070&auto=format&fit=crop"
+                src="/background.jpg"
                 alt="Recycling plastic bottles"
                 fill
                 className="object-cover"
-                data-ai-hint="recycling bottles"
             />
             <div className="absolute inset-0 bg-black/50" />
             <div className="relative z-10 flex flex-col items-center gap-6 p-4">
