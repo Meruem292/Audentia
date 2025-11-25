@@ -111,7 +111,9 @@ export function BottleHistoryTable() {
                         </Avatar>
                         <div>
                             <div className="font-medium">{user?.name || user?.email || 'Unknown User'}</div>
-                            <div className="text-sm text-muted-foreground">{user?.email}</div>
+                            {user?.name && (
+                                <div className="text-sm text-muted-foreground">{user.email}</div>
+                            )}
                         </div>
                       </div>
                     </TableCell>
