@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "reward-1",
+      "description": "A reusable coffee cup.",
+      "imageUrl": "https://images.unsplash.com/photo-1506372023823-741c83b836fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjb2ZmZWUlMjBjdXB8ZW58MHx8fHwxNzYzOTk0NDU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee cup"
+    },
+    {
+      "id": "reward-2",
+      "description": "A metal water bottle.",
+      "imageUrl": "https://images.unsplash.com/photo-1625708458528-802ec79b1ed8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3YXRlciUyMGJvdHRsZXxlbnwwfHx8fDE3NjM5NjU2ODF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "water bottle"
+    },
+    {
+      "id": "reward-3",
+      "description": "A gift card for a local cafe.",
+      "imageUrl": "https://images.unsplash.com/photo-1637070155805-e6fbee6ec2cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaWZ0JTIwY2FyZHxlbnwwfHx8fDE3NjQwMjU1MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gift card"
+    },
+    {
+      "id": "reward-4",
+      "description": "A tote bag made from recycled materials.",
+      "imageUrl": "https://images.unsplash.com/photo-1578237493287-8d4d2b03591a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0b3RlJTIwYmFnfGVufDB8fHx8MTc2Mzk3Mjc3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tote bag"
+    },
+    {
+      "id": "reward-5",
+      "description": "A pack of bamboo straws.",
+      "imageUrl": "https://images.unsplash.com/photo-1755499996424-1aa0b53e1893?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxiYW1ib28lMjBzdHJhd3N8ZW58MHx8fHwxNzY0MDQ5MDIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bamboo straws"
+    },
+    {
+      "id": "reward-6",
+      "description": "A discount voucher for a sustainable products store.",
+      "imageUrl": "https://images.unsplash.com/photo-1563302111-eab4b145e6c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkaXNjb3VudCUyMHZvdWNoZXJ8ZW58MHx8fHwxNzY0MDQ5MDIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "discount voucher"
+    }
+  ]
 }
