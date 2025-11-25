@@ -24,10 +24,21 @@ export default function AdminOverviewPage() {
     return query(collection(firestore, "dispense_history"));
   }, [firestore]);
 
+  const bottleHistoryQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "bottle_history"));
+    }, [firestore]);
+
   const { data: users, loading: usersLoading } = useCollection(usersQuery);
   const { data: dispenseHistory, loading: dispenseHistoryLoading } = useCollection(dispenseHistoryQuery);
+  const { data: bottleHistory, loading: bottleHistoryLoading } = useCollection(bottleHistoryQuery);
 
-  const loading = usersLoading || dispenseHistoryLoading;
+  const loading = usersLoading || dispenseHistoryLoading || bottleHistoryLoading;
+
+  const totalBottlesRecycled = useMemo(() => {
+    if (!bottleHistory) return 0;
+    return bottleHistory.reduce((total, item) => total + (item.plasticBottleCount || 0), 0);
+  }, [bottleHistory]);
 
   return (
     <div className="space-y-6">
@@ -76,12 +87,18 @@ export default function AdminOverviewPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bottles Recycled (MTD)</CardTitle>
+            <CardTitle className="text-sm font-medium">Bottles Recycled</CardTitle>
             <Recycle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12,543</div>
-            <p className="text-xs text-muted-foreground">On track to beat last month</p>
+             {loading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <>
+                  <div className="text-2xl font-bold">{totalBottlesRecycled.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">Total bottles recycled to date</p>
+                </>
+              )}
           </CardContent>
         </Card>
       </div>
