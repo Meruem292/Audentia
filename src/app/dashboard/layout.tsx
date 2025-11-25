@@ -7,7 +7,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarInset,
-  SidebarTrigger,
   Sheet,
   SheetContent,
   SheetTrigger,
@@ -20,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { PanelLeft } from "lucide-react";
+import { BottomNav } from "@/components/shared/bottom-nav";
 
 export default function DashboardLayout({
   children,
@@ -60,44 +60,42 @@ export default function DashboardLayout({
 
   if (isMobile) {
     return (
-      <SidebarProvider>
-         <div className="flex flex-col min-h-screen">
-            <Header>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <PanelLeft />
-                    <span className="sr-only">Toggle Menu</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0">
-                  <DashboardNav navItems={userNavItems} />
-                </SheetContent>
-              </Sheet>
-            </Header>
-            <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
-              {children}
-            </main>
-          </div>
-      </SidebarProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <PanelLeft />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0">
+              <DashboardNav navItems={userNavItems} />
+            </SheetContent>
+          </Sheet>
+        </Header>
+        <main className="p-4 sm:p-6 lg:p-8 flex-1 pb-20 animate-fade-in">
+          {children}
+        </main>
+        <BottomNav navItems={userNavItems} />
+      </div>
     );
   }
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex">
         <Sidebar>
           <DashboardNav navItems={userNavItems} />
         </Sidebar>
-        <SidebarInset>
+        <div className="flex-1 flex flex-col">
           <Header>
-            <SidebarTrigger />
-             <h1 className="text-xl font-bold tracking-tight">User Dashboard</h1>
+             <h1 className="text-xl font-bold tracking-tight ml-4">User Dashboard</h1>
           </Header>
           <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
             {children}
           </main>
-        </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
