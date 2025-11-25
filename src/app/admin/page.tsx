@@ -9,6 +9,7 @@ import { useCollection, useFirestore } from "@/lib/firebase";
 import { collection, query } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BottleHistoryTable } from "@/components/admin/bottle-history-table";
+import { DispenseHistoryTable } from "@/components/admin/dispense-history-table";
 
 export default function AdminOverviewPage() {
   const firestore = useFirestore();
@@ -50,7 +51,7 @@ export default function AdminOverviewPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y_0 pb-2">
             <CardTitle className="text-sm font-medium">Rewards Redeemed</CardTitle>
             <Archive className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -71,7 +72,10 @@ export default function AdminOverviewPage() {
         </Card>
       </div>
       <OverviewChart />
-      <BottleHistoryTable />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BottleHistoryTable />
+        <DispenseHistoryTable />
+      </div>
     </div>
   );
 }
