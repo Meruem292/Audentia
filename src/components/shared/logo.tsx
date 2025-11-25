@@ -1,11 +1,11 @@
 
-import { Recycle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export function Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <Recycle className="h-6 w-6 text-primary" />
+      <Image src="/logo.png" alt="EcoVend Hub logo" width={24} height={24} className="h-6 w-6" />
       <span className="font-bold font-headline text-lg">EcoVend Hub</span>
     </div>
   );
