@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,23 +30,34 @@ export function UserNav() {
     }
   };
 
+  const getInitials = () => {
+    if (userProfile?.name) {
+      return userProfile.name.charAt(0).toUpperCase();
+    }
+    if (userProfile?.email) {
+      return userProfile.email.charAt(0).toUpperCase();
+    }
+    return <UserIcon />;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={`https://picsum.photos/seed/${userProfile?.uid}/100/100`} alt="User avatar" data-ai-hint="person face" />
-            <AvatarFallback>{userProfile?.name?.charAt(0) || 'U'}</AvatarFallback>
+            <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{userProfile?.name || 'User'}</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {userProfile?.email}
-            </p>
+            <p className="text-sm font-medium leading-none">{userProfile?.name || userProfile?.email}</p>
+            {userProfile?.name && (
+              <p className="text-xs leading-none text-muted-foreground">
+                {userProfile?.email}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
