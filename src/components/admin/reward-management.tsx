@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
     Table,
     TableBody,
@@ -9,26 +11,68 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCollection, useFirestore } from "@/lib/firebase";
+import { collection, query, DocumentData } from "firebase/firestore";
+import { Skeleton } from "../ui/skeleton";
 
-const rewards = [
-  { id: "1", name: "Reusable Coffee Cup", points: 500, stock: 150, image: PlaceHolderImages.find(i => i.id === 'reward-1')! },
-  { id: "2", name: "Metal Water Bottle", points: 750, stock: 80, image: PlaceHolderImages.find(i => i.id === 'reward-2')! },
-  { id: "3", name: "€10 Cafe Gift Card", points: 1000, stock: 200, image: PlaceHolderImages.find(i => i.id === 'reward-3')! },
-  { id: "4", name: "Recycled Tote Bag", points: 400, stock: 300, image: PlaceHolderImages.find(i => i.id === 'reward-4')! },
-];
+interface Reward extends DocumentData {
+  id: string;
+  name: string;
+  points: number;
+  imageUrl: string;
+}
 
 export function RewardManagement() {
+    const firestore = useFirestore();
+    const rewardsQuery = firestore ? query(collection(firestore, "rewards")) : null;
+    const { data: rewards, loading, error } = useCollection<Reward>(rewardsQuery);
+
+    if (loading) {
+        return (
+            <div className="space-y-4">
+                 <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Reward</TableHead>
+                            <TableHead>Points Cost</TableHead>
+                            <TableHead>Stock</TableHead>
+                            <TableHead><span className="sr-only">Actions</span></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {[...Array(4)].map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell>
+                                    <div className="flex items-center gap-4">
+                                        <Skeleton className="h-16 w-16 rounded-md" />
+                                        <Skeleton className="h-4 w-32" />
+                                    </div>
+                                </TableCell>
+                                <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                                <TableCell className="text-right">
+                                    <Skeleton className="h-8 w-8" />
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        )
+    }
+
+    if (error) {
+        return <div>Error loading rewards. Please try again.</div>
+    }
+
+    if (!rewards || rewards.length === 0) {
+        return <div className="text-center text-muted-foreground py-8">No rewards found.</div>
+    }
+
     return (
         <div className="space-y-4">
-            <div className="flex justify-end">
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Reward
-                </Button>
-            </div>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -44,18 +88,17 @@ export function RewardManagement() {
                             <TableCell>
                                 <div className="flex items-center gap-4">
                                     <Image
-                                        src={reward.image.imageUrl}
-                                        alt={reward.image.description}
+                                        src={reward.imageUrl}
+                                        alt={reward.name}
                                         width={64}
-                                        height={48}
+                                        height={64}
                                         className="rounded-md object-cover"
-                                        data-ai-hint={reward.image.imageHint}
                                     />
                                     <span className="font-medium">{reward.name}</span>
                                 </div>
                             </TableCell>
                             <TableCell>{reward.points.toLocaleString()}</TableCell>
-                            <TableCell>{reward.stock.toLocaleString()}</TableCell>
+                            <TableCell>{/* Stock info not in provided data, leaving empty */}</TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -65,8 +108,6 @@ export function RewardManagement() {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                                        <DropdownMenuItem>View redemptions</DropdownMenuItem>
-                                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>
