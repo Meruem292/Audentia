@@ -7,7 +7,6 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarInset,
-  SidebarTrigger,
   Sheet,
   SheetContent,
   SheetTrigger,
@@ -62,44 +61,42 @@ export default function AdminLayout({
 
   if (isMobile) {
     return (
-      <SidebarProvider>
-         <div className="flex flex-col min-h-screen">
-            <Header>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <PanelLeft />
-                    <span className="sr-only">Toggle Menu</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0">
-                  <DashboardNav navItems={adminNavItems} />
-                </SheetContent>
-              </Sheet>
-            </Header>
-            <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
-              {children}
-            </main>
-          </div>
-      </SidebarProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <PanelLeft />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0">
+              <DashboardNav navItems={adminNavItems} />
+            </SheetContent>
+          </Sheet>
+        </Header>
+        <main className="p-4 sm:p-6 lg:p-8 flex-1 pb-20 animate-fade-in">
+          {children}
+        </main>
+        <BottomNav navItems={adminNavItems} />
+      </div>
     );
   }
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex">
         <Sidebar>
           <DashboardNav navItems={adminNavItems} />
         </Sidebar>
-        <SidebarInset>
+        <div className="flex-1 flex flex-col">
           <Header>
-            <SidebarTrigger />
-             <h1 className="text-xl font-bold tracking-tight">Admin</h1>
+             <h1 className="text-xl font-bold tracking-tight ml-4">Admin</h1>
           </Header>
           <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
             {children}
           </main>
-        </SidebarInset>
+        </div>
       </div>
     </SidebarProvider>
   );
