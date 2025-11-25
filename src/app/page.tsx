@@ -27,7 +27,7 @@ export default function Home() {
         data-ai-hint="recycling environment"
         priority
       />
-      <div className="absolute inset-0 bg-black/60 z-[-1]" />
+      <div className="absolute inset-0 bg-black/40 z-[-1]" />
 
 
       {/* Header */}
