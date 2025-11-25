@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/lib/firebase';
 import { collection, query, orderBy, Timestamp, DocumentData } from 'firebase/firestore';
@@ -22,7 +23,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User } from 'lucide-react';
+import { User, ChevronDown } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
+
 
 interface BottleHistory extends DocumentData {
   id: string;
@@ -38,6 +43,69 @@ interface UserProfile {
     name: string;
     email: string;
     sixDigitId: string;
+}
+
+function BottleHistoryRow({ item, user }: { item: BottleHistory, user: UserProfile | undefined }) {
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    return (
+        <Collapsible asChild open={isOpen} onOpenChange={setIsOpen}>
+            <TableBody>
+                <TableRow>
+                    <TableCell>
+                      <div className="flex items-center gap-4">
+                        <Avatar>
+                            <AvatarFallback>{user?.email ? user.email.charAt(0).toUpperCase() : <User />}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <div className="font-medium">{user?.name || user?.email || 'Unknown User'}</div>
+                            {user?.name && user?.email && (
+                                <div className="text-sm text-muted-foreground">{user.email}</div>
+                            )}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{item.plasticBottleCount}</TableCell>
+                    <TableCell className="font-medium text-primary hidden md:table-cell">+{item.pointsEarned}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant={item.status === 'valid' ? 'default' : 'destructive'}>
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right md:hidden">
+                       <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                                <span className="sr-only">{isOpen ? "Collapse" :_("Expand")}</span>
+                            </Button>
+                        </CollapsibleTrigger>
+                    </TableCell>
+                </TableRow>
+                <CollapsibleContent asChild>
+                    <TableRow>
+                        <TableCell colSpan={4} className="pt-0">
+                           <div className="p-4 space-y-4 bg-muted/50 rounded-md">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-muted-foreground">Bottles</span>
+                                    <span>{item.plasticBottleCount}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-muted-foreground">Points</span>
+                                    <span className="font-medium text-primary">+{item.pointsEarned}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-muted-foreground">Status</span>
+                                    <Badge variant={item.status === 'valid' ? 'default' : 'destructive'}>
+                                        {item.status}
+                                    </Badge>
+                                </div>
+                           </div>
+                        </TableCell>
+                    </TableRow>
+                </CollapsibleContent>
+            </TableBody>
+        </Collapsible>
+    )
 }
 
 export function BottleHistoryTable() {
@@ -69,19 +137,20 @@ export function BottleHistoryTable() {
         <CardTitle>Bottle Insertion History</CardTitle>
         <CardDescription>A log of all bottle deposits from all users.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>User</TableHead>
-              <TableHead>Bottles</TableHead>
-              <TableHead>Points</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Bottles</TableHead>
+              <TableHead className="hidden md:table-cell">Points</TableHead>
+              <TableHead className="hidden md:table-cell">Status</TableHead>
+              <TableHead className="md:hidden"><span className="sr-only">Expand</span></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
             {loading ? (
-              [...Array(5)].map((_, i) => (
+                <TableBody>
+              {[...Array(5)].map((_, i) => (
                 <TableRow key={i}>
                   <TableCell>
                     <div className="flex items-center gap-4">
@@ -92,47 +161,29 @@ export function BottleHistoryTable() {
                         </div>
                     </div>
                   </TableCell>
-                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                  <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-8" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-12" /></TableCell>
+                  <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-16" /></TableCell>
+                  <TableCell className="md:hidden"><Skeleton className="h-8 w-8" /></TableCell>
                 </TableRow>
-              ))
+              ))}
+                </TableBody>
             ) : history && history.length > 0 ? (
               history.map((item) => {
                 const user = usersMap.get(item.userId);
                 return (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                            <AvatarFallback>{user?.email ? user.email.charAt(0).toUpperCase() : <User />}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <div className="font-medium">{user?.name || user?.email || 'Unknown User'}</div>
-                            {user?.name && user?.email && (
-                                <div className="text-sm text-muted-foreground">{user.email}</div>
-                            )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.plasticBottleCount}</TableCell>
-                    <TableCell className="font-medium text-primary">+{item.pointsEarned}</TableCell>
-                    <TableCell>
-                      <Badge variant={item.status === 'valid' ? 'default' : 'destructive'}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
+                  <BottleHistoryRow key={item.id} item={item} user={user} />
                 );
               })
             ) : (
+             <TableBody>
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
                   No bottle insertion history found.
                 </TableCell>
               </TableRow>
+             </TableBody>
             )}
-          </TableBody>
         </Table>
       </CardContent>
     </Card>
