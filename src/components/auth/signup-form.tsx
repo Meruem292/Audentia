@@ -74,7 +74,7 @@ export function SignupForm() {
   };
 
   return (
-    <Card>
+    <Card className="bg-transparent border-0 shadow-none sm:border sm:shadow-sm sm:bg-card">
       <CardHeader>
         <CardTitle>Create an Account</CardTitle>
         <CardDescription>

@@ -7,6 +7,10 @@ import {
   SidebarProvider,
   Sidebar,
   SidebarInset,
+  SidebarTrigger,
+  Sheet,
+  SheetContent,
+  SheetTrigger,
 } from "@/components/ui/sidebar";
 import { userNavItems } from "@/lib/data";
 import { useUser } from "@/lib/firebase";
@@ -14,7 +18,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { BottomNav } from "@/components/shared/bottom-nav";
+import { Button } from "@/components/ui/button";
+import { PanelLeft } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -53,6 +58,31 @@ export default function DashboardLayout({
     );
   }
 
+  if (isMobile) {
+    return (
+      <SidebarProvider>
+         <div className="flex flex-col min-h-screen">
+            <Header>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <PanelLeft />
+                    <span className="sr-only">Toggle Menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0">
+                  <DashboardNav navItems={userNavItems} />
+                </SheetContent>
+              </Sheet>
+            </Header>
+            <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
+              {children}
+            </main>
+          </div>
+      </SidebarProvider>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen">
@@ -60,12 +90,14 @@ export default function DashboardLayout({
           <DashboardNav navItems={userNavItems} />
         </Sidebar>
         <SidebarInset>
-          <Header title="User Dashboard" />
-          <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in pb-20 md:pb-8">
+          <Header>
+            <SidebarTrigger />
+             <h1 className="text-xl font-bold tracking-tight">User Dashboard</h1>
+          </Header>
+          <main className="p-4 sm:p-6 lg:p-8 flex-1 animate-fade-in">
             {children}
           </main>
         </SidebarInset>
-        {isMobile && <BottomNav navItems={userNavItems} />}
       </div>
     </SidebarProvider>
   );
