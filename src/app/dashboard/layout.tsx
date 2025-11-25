@@ -6,7 +6,6 @@ import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import {
   SidebarProvider,
   Sidebar,
-  SidebarInset,
   Sheet,
   SheetContent,
   SheetTrigger,
