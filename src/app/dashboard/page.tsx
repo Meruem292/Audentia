@@ -172,10 +172,6 @@ export default function DashboardPage() {
                 A log of your recent deposits and redemptions.
               </CardDescription>
             </div>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Deposit Bottles
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
