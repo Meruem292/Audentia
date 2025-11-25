@@ -108,7 +108,7 @@ export function BottleHistoryTable() {
                       <div className="flex items-center gap-4">
                         <Avatar>
                             <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/40/40`} data-ai-hint="person face" />
-                            <AvatarFallback>{user ? user.name.charAt(0) : <User />}</AvatarFallback>
+                            <AvatarFallback>{user?.name ? user.name.charAt(0) : <User />}</AvatarFallback>
                         </Avatar>
                         <div>
                             <div className="font-medium">{user?.name || 'Unknown User'}</div>
