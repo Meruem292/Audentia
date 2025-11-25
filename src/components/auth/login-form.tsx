@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from 'next/navigation';
 import { useAuth, useFirestore } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -54,21 +54,45 @@ export function LoginForm() {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        
+        // Check if selected role matches the user's actual role
+        if (userData.role !== role) {
+          toast({
+            variant: "destructive",
+            title: "Sign in failed",
+            description: `You are not registered as a'${role}'. Please select the correct role.`,
+          });
+          // Sign out the user because the role is incorrect
+          await signOut(auth);
+          setLoading(false);
+          return;
+        }
+
         if (userData.role === 'admin') {
           router.push('/admin');
         } else {
           router.push('/dashboard');
         }
       } else {
-        // Default to dashboard if no role or doc found
-        router.push('/dashboard');
+        // User exists in auth but not in DB. This is an edge case.
+        // If the selected role is user, allow them to go to dashboard.
+        if(role === 'user') {
+          router.push('/dashboard');
+        } else {
+           toast({
+            variant: "destructive",
+            title: "Sign in failed",
+            description: "User data not found.",
+          });
+          await signOut(auth);
+        }
       }
     } catch (error: any) {
       console.error("Sign in error:", error);
       toast({
         variant: "destructive",
         title: "Sign in failed",
-        description: error.message || "An unexpected error occurred.",
+        description: "Invalid email or password.",
       });
     } finally {
       setLoading(false);
