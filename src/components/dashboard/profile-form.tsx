@@ -18,6 +18,7 @@ import {
 } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from '../ui/skeleton';
+import { Eye, EyeOff } from 'lucide-react';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -35,6 +36,7 @@ export function ProfileForm() {
     const auth = useAuth();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [showId, setShowId] = useState(false);
 
     const { register, handleSubmit, reset, formState: { errors } } = useForm<PasswordFormData>({
         resolver: zodResolver(passwordSchema),
@@ -120,7 +122,26 @@ export function ProfileForm() {
                     <p className="text-muted-foreground">{userProfile.email}</p>
                 </div>
             </div>
+
+            <Separator />
             
+            <div className="space-y-2">
+                <h3 className="text-lg font-medium">Your Unique ID</h3>
+                <p className="text-sm text-muted-foreground">This is your unique 6-digit ID for the vending machines.</p>
+                <div className="flex items-center gap-2">
+                    <Input 
+                        id="sixDigitId" 
+                        readOnly 
+                        value={showId ? userProfile.sixDigitId : '******'}
+                        className="font-mono text-lg tracking-widest w-32"
+                    />
+                    <Button variant="ghost" size="icon" onClick={() => setShowId(prev => !prev)}>
+                        {showId ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        <span className="sr-only">{showId ? 'Hide ID' : 'Show ID'}</span>
+                    </Button>
+                </div>
+            </div>
+
             <Separator />
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
